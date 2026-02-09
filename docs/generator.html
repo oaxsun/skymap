@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Generador | SkyMap</title>
+  <meta name="description" content="Genera tu mapa estelar y descárgalo en PDF." />
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 18px;}
+    .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:18px;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+    label{display:block;font-size:13px;opacity:.9;margin:10px 0 6px;}
+    input,select{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.18);color:inherit}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media (max-width:600px){.row{grid-template-columns:1fr;}}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.25);color:inherit;cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg, rgba(0,255,153,.22), rgba(0,255,153,.08));border-color:rgba(0,255,153,.35)}
+    .hint{font-size:13px;opacity:.8;margin-top:10px;line-height:1.4}
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999}
+    .modal{width:min(520px, 100%);background:#0b1020;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px}
+    .modal h3{margin:0 0 8px;font-size:18px}
+    .sizes{display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-top:12px}
+    @media (max-width:520px){.sizes{grid-template-columns:1fr 1fr;}}
+    .sizeBtn{padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);cursor:pointer}
+    .sizeBtn strong{display:block;font-size:14px}
+    .sizeBtn span{display:block;font-size:12px;opacity:.8;margin-top:4px}
+    .modal .footer{display:flex;justify-content:flex-end;margin-top:14px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./index.html" style="opacity:.85;text-decoration:none;color:inherit">← Volver</a>
+    <h1 style="margin:14px 0 10px">Genera tu SkyMap (PDF)</h1>
+
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label>Título</label>
+          <input id="title" maxlength="120" placeholder="NIGHT SKY" value="NIGHT SKY" />
+          <label>Subtítulo</label>
+          <input id="subtitle" maxlength="240" placeholder="A moment to remember" value="A moment to remember" />
+          <label>Estilo</label>
+          <select id="style">
+            <option value="classic" selected>Classic</option>
+            <option value="inverted">Inverted</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="row">
+            <div>
+              <label>Latitud</label>
+              <input id="lat" inputmode="decimal" value="19.4326" />
+            </div>
+            <div>
+              <label>Longitud</label>
+              <input id="lon" inputmode="decimal" value="-99.1332" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Fecha</label>
+              <input id="date" type="date" value="1995-12-25" />
+            </div>
+            <div>
+              <label>Hora</label>
+              <input id="time" type="time" value="19:30" />
+            </div>
+          </div>
+          <label>Overlay / Dedicatoria</label>
+          <input id="overlay" maxlength="200" placeholder="Mexico City, MX • 19.4326, -99.1332" value="Mexico City, MX • 19.4326, -99.1332" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="openSizes">Descargar PDF</button>
+      </div>
+      <div class="hint">
+        Por ahora el PDF se genera en el servidor para proteger el código del generador.
+        (Más adelante: Stripe → pago → ventana de descarga con tamaños.)
+      </div>
+      <div class="hint" id="status" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- Modal tamaños -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Selecciona tamaño">
+      <h3>Selecciona tamaño</h3>
+      <div style="font-size:13px;opacity:.85">Elige la medida para tu PDF.</div>
+
+      <div class="sizes">
+        <button class="sizeBtn" data-size="S"><strong>S</strong><span>A4</span></button>
+        <button class="sizeBtn" data-size="M"><strong>M</strong><span>A2</span></button>
+        <button class="sizeBtn" data-size="L"><strong>L</strong><span>A1</span></button>
+        <button class="sizeBtn" data-size="XL"><strong>XL</strong><span>A0</span></button>
+      </div>
+
+      <div class="footer">
+        <button class="btn" id="closeModal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/generator-client.js"></script>
+</body>
+</html>
