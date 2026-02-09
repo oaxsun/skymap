@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+
+  <title>Generador de mapa estelar | Mapa Estelar</title>
+
+  <!-- =========================
+       SEO BASICO
+       ========================= -->
+  <meta name="description" content="Genera tu mapa estelar personalizado: fecha, lugar, estilo, texto y exportación en alta calidad." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://TU-DOMINIO.com/generator.html" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Generador de mapa estelar | Mapa Estelar" />
+  <meta property="og:description" content="Crea y exporta tu mapa estelar personalizado en alta calidad." />
+  <meta property="og:url" content="https://TU-DOMINIO.com/generator.html" />
+  <meta property="og:image" content="https://TU-DOMINIO.com/og-image.jpg" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Generador de mapa estelar | Mapa Estelar" />
+  <meta name="twitter:description" content="Genera tu mapa estelar personalizado y expórtalo en alta calidad." />
+  <meta name="twitter:image" content="https://TU-DOMINIO.com/og-image.jpg" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Generador de mapa estelar | Mapa Estelar",
+    "applicationCategory": "DesignApplication",
+    "operatingSystem": "Web",
+    "description": "Genera mapas estelares personalizados con estilos, colores y exportación en alta calidad.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <style>
+    :root{
+      --bg:#07080c;
+      --panel:#0f121a;
+      --panel2:#0c0f15;
+      --text:#e9eefc;
+      --muted: rgba(233,238,252,.70);
+      --stroke: rgba(233,238,252,.10);
+      --accent: rgba(124,255,250,.45);
+      --accentSolid: #7CFFFA;
+      --accentFill: rgba(124,255,250,.12);
+
+      --beige: #E9D8B5;
+
+      --headerH: 66px;
+      --editorW: 420px;
+
+      /* ✅ preview zoom adaptativo (JS lo actualiza en desktop) */
+      --previewZoom: 0.75;
+
+      --posterW: 900px;
+      --posterH: 1200px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    body{ overflow:hidden; }
+
+    .noScrollBar{
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .noScrollBar::-webkit-scrollbar{
+      width: 0;
+      height: 0;
+    }
+
+    #app{
+      height:100%;
+      display:grid;
+      grid-template-rows: var(--headerH) 1fr;
+      grid-template-columns: 1fr var(--editorW);
+      grid-template-areas:
+        "header header"
+        "preview editor";
+    }
+
+    .topbar{
+      grid-area: header;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(15,18,26,.85), rgba(12,15,21,.65));
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 80;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 0;
+    }
+
+    .dot{
+      width:12px;height:12px;border-radius:999px;background: var(--accentSolid);
+      box-shadow:0 0 24px rgba(124,255,250,.35);
+      flex: 0 0 auto;
+    }
+
+    .brandText{ min-width: 0; }
+    .brandTitle{
+      font-weight: 900;
+      letter-spacing: .2px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .brandSub{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbarRight{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space:nowrap;
+    }
+
+    .previewArea{
+      grid-area: preview;
+      position:relative;
+      overflow:hidden; /* ✅ sin scroll desktop */
+      padding: 16px;
+
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    .previewWrap{
+      width:100%;
+      max-width: 980px;
+      position:relative;
+      padding-bottom: 12px;
+      overflow: visible;
+    }
+
+    /* ✅ sombra tenue alrededor del preview */
+    .previewStage{
+      position: relative;
+      width: calc(var(--posterW) * var(--previewZoom));
+      height: calc(var(--posterH) * var(--previewZoom));
+      overflow: hidden;
+      transform-origin: top left;
+      border-radius: 26px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 18px 70px rgba(0,0,0,.55);
+    }
+
+    /* =========================
+       ✅ WATERMARK OVERLAY (preview only)
+       ========================= */
+    .watermark{
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0.22; /* ajusta: 0.12 - 0.30 */
+      background-repeat: repeat;
+      background-size: 260px 260px;
+      mix-blend-mode: normal;
+    }
+    @media (max-width: 980px){
+      .watermark{ opacity: 0.28; }
+    }
+
+    .previewScale{
+      position:absolute;
+      top:0;
+      left:0;
+      width: var(--posterW);
+      height: var(--posterH);
+      transform-origin: top left;
+      will-change: transform;
+      transform: scale(var(--previewZoom));
+    }
+
+    .poster{
+      width: 900px;
+      height: 1200px;
+      border-radius: 26px;
+      position:relative;
+      overflow:hidden;
+
+      --posterPad: 0px;
+      --mapW: 780px;
+      --mapH: 780px;
+
+      --bottomTextBottom: 100px;
+      --innerTop: 70px;
+    }
+
+    .posterInner{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      padding-top: calc(var(--posterPad) + var(--innerTop));
+    }
+
+    .mapFrame{
+      width: var(--mapW);
+      height: var(--mapH);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    canvas#mapCanvas{
+      width: var(--mapW);
+      height: var(--mapH);
+      display:block;
+    }
+
+    .bottomText{
+      position:absolute;
+      left: calc(var(--posterPad) + 80px);
+      right: calc(var(--posterPad) + 80px);
+      bottom: calc(var(--posterPad) + var(--bottomTextBottom));
+      padding:0;
+    }
+
+    .tTitle{
+      font-size:54px;
+      letter-spacing:2px;
+      font-weight:900;
+      margin-bottom:10px;
+      line-height: 1.02;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tSub{
+      font-size:18px;
+      opacity:.85;
+      margin-bottom:22px;
+      line-height: 1.22;
+      overflow: hidden;
+    }
+    .meta{
+      display:flex;
+      justify-content:flex-start;
+      gap:20px;
+      font-size:14px;
+      opacity:.82;
+    }
+    .metaCol{ display:flex; flex-direction:column; gap:6px; }
+    .metaRow{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .poster.classic .bottomText{
+      left: calc(var(--posterPad) + 110px);
+      right: calc(var(--posterPad) + 110px);
+      bottom: calc(var(--posterPad) + var(--bottomTextBottom));
+      text-align:center;
+    }
+    .poster.classic .meta{ justify-content:center; }
+    .poster.classic .metaCol{ align-items:center; text-align:center; }
+    .poster.classic .tTitle{ letter-spacing:1.6px; }
+
+    .poster.rectStyle .bottomText{
+      bottom: calc(var(--posterPad) + var(--bottomTextBottom));
+      left: calc(var(--posterPad) + 110px);
+      right: calc(var(--posterPad) + 110px);
+      text-align:center;
+    }
+    .poster.rectStyle .tTitle{
+      font-size: 46px;
+      margin-bottom: 8px;
+      letter-spacing: 1.4px;
+    }
+    .poster.rectStyle .tSub{
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    .poster.rectStyle .meta{
+      justify-content:center;
+      font-size: 12px;
+      gap: 16px;
+    }
+    .poster.rectStyle .metaCol{ align-items:center; text-align:center; }
+
+    /* ✅ Moderno + marco */
+    .poster.modern.frameOn .tTitle{ letter-spacing: 1.3px; }
+    .poster.modern.frameOn .tSub{ margin-bottom: 16px; }
+    .poster.modern.frameOn .meta{ font-size: 12px; }
+
+    /* Editor */
+    .editorDock{
+      grid-area: editor;
+      padding: 16px 16px 16px 0;
+      overflow:hidden;
+    }
+
+    .sheet{
+      height: 100%;
+      border: 1px solid var(--stroke);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(15,18,26,.92), rgba(12,15,21,.86));
+      box-shadow: 0 24px 90px rgba(0,0,0,.40);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    .sheetTabs{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 12px 12px 10px 12px;
+      align-items: end;
+    }
+
+    .sheetTab{
+      background: transparent;
+      border: 0;
+      color: rgba(233,238,252,.50);
+      font-weight: 400;
+      font-size: 13px;
+      padding: 10px 0 18px 0;
+      cursor:pointer;
+      position: relative;
+      letter-spacing: .2px;
+      -webkit-tap-highlight-color: transparent;
+      text-align:center;
+      width: 100%;
+      line-height: 1.1;
+    }
+
+    .sheetTab.active{
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .sheetTab.active::after{
+      content:"";
+      position:absolute;
+      left: 0;
+      right: 0;
+      bottom: 4px;
+      height: 4px;
+      background: var(--accentSolid);
+      border-radius: 999px;
+      box-shadow: 0 0 14px rgba(124,255,250,.22);
+    }
+
+    .sheetBody{
+      padding: 14px;
+      overflow:auto;
+    }
+
+    .card{ border:0; border-radius:0; padding:0; background: transparent; }
+
+    .title{ font-weight:800; margin-bottom:4px; }
+    .sub{ font-size:12px; color:var(--muted); margin-bottom:12px; }
+
+    .btnRow{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:12px;
+      align-items:center;
+    }
+
+    .btn{
+      border-radius:14px;
+      padding:10px 12px;
+      cursor:pointer;
+      font-weight:850;
+      user-select:none;
+      white-space:nowrap;
+      min-height:44px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn.ghost{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      color:var(--text);
+    }
+    .btn.primary{
+      border:1px solid var(--accent);
+      background: var(--accentFill);
+      color:var(--text);
+    }
+
+    .toggle{
+      width: 44px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      position: relative;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: 160ms ease;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .toggle::after{
+      content:"";
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(233,238,252,.92);
+      position:absolute;
+      top: 50%;
+      left: 3px;
+      transform: translateY(-50%);
+      transition: 160ms ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+    .toggle.on{
+      border-color: var(--accent);
+      background: rgba(124,255,250,.18);
+      box-shadow: 0 0 0 3px rgba(124,255,250,.10);
+    }
+    .toggle.on::after{
+      left: 23px;
+      background: rgba(124,255,250,.95);
+    }
+
+    .formRow{ display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    .label{ font-size:12px; color:var(--muted); }
+
+    /* ✅ beige para labels de sliders */
+    .sliderLabel{ color: var(--beige) !important; }
+
+    .input, .select{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      outline:none;
+    }
+    input[type="range"]{ width:100%; }
+
+    .styleGrid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+    }
+    @media (max-width: 520px){
+      .styleGrid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .styleTile{ cursor:pointer; user-select:none; }
+    .stylePoster{
+      width:100%;
+      aspect-ratio: 3 / 4;
+      border-radius: 10px;
+      background: rgba(0,0,0,.18);
+      border: 2px solid rgba(0,0,0,0);
+      overflow:hidden;
+      position:relative;
+      box-shadow: 0 10px 24px rgba(0,0,0,.28);
+    }
+    .styleTile.active .stylePoster{
+      border-color: rgba(255,210,90,.95);
+      box-shadow: 0 0 0 2px rgba(255,210,90,.25), 0 10px 24px rgba(0,0,0,.28);
+    }
+    .stylePoster canvas{ width:100%; height:100%; display:block; }
+    .styleNameLabel{
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+      opacity: .92;
+    }
+
+    .swatchGrid{
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .swatchTile{ cursor:pointer; user-select:none; text-align:center; }
+    .swatchDot{
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(233,238,252,.16);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin: 0 auto;
+      box-shadow: 0 10px 20px rgba(0,0,0,.22);
+    }
+    .swatchTile.active .swatchDot{
+      border-color: rgba(255,210,90,.95);
+      box-shadow: 0 0 0 2px rgba(255,210,90,.25), 0 10px 20px rgba(0,0,0,.22);
+    }
+    .swatchName{
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      opacity: .92;
+    }
+    .groupGap{ height: 14px; }
+
+    .fieldCard{
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      background: rgba(255,255,255,.02);
+      overflow:hidden;
+      margin-bottom: 10px;
+    }
+    .fieldHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 14px;
+    }
+    .fieldHeader .fieldLabel{
+      font-weight: 900;
+      font-size: 16px;
+    }
+    .fieldBody{ padding: 0 14px 14px 14px; }
+    .fieldInput{
+      width:100%;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      padding: 14px 12px;
+      border-radius: 14px;
+      outline:none;
+      font-size: 16px;
+    }
+
+    @media (max-width: 980px){
+      body{ overflow:auto; }
+
+      #app{
+        height: auto;
+        min-height: 100vh;
+        grid-template-columns: 1fr;
+        grid-template-rows: var(--headerH) auto auto;
+        grid-template-areas:
+          "header"
+          "preview"
+          "editor";
+      }
+
+      .previewArea{
+        overflow: visible;
+        padding: 12px;
+        display:block;
+      }
+
+      .editorDock{
+        display:block;
+        padding: 0;
+        overflow: visible;
+      }
+
+      .sheet{
+        width: 100%;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+        box-shadow: none;
+        height: auto;
+      }
+
+      .sheetTabs{ padding: 12px 12px 10px 12px; }
+      .sheetTab{ font-size: 13px; padding: 10px 0 16px 0; }
+      .sheetTab.active::after{ height: 4px; bottom: 4px; }
+
+      .sheetBody{
+        padding: 12px;
+        overflow: visible;
+      }
+
+      :root{ --previewZoom: 0.45; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="dot"></div>
+        <div class="brandText">
+          <div class="brandTitle">Sky Art Creator</div>
+          <div class="brandSub">v2.100126.finalUI</div>
+        </div>
+      </div>
+      <div class="topbarRight">© wolffel 2026</div>
+    </header>
+
+    <main class="previewArea noScrollBar" id="previewArea">
+      <div class="previewWrap">
+        <div class="previewStage">
+          <!-- ✅ watermark overlay (solo preview) -->
+          <div class="watermark" id="watermark"></div>
+
+          <div class="previewScale" id="previewScale">
+            <div class="poster" id="poster">
+              <div class="posterInner">
+                <div class="mapFrame">
+                  <canvas id="mapCanvas"></canvas>
+                </div>
+
+                <div class="bottomText" id="bottomText">
+                  <div class="tTitle" id="pTitle"></div>
+                  <div class="tSub" id="pSubtitle"></div>
+
+                  <div class="meta">
+                    <div class="metaCol">
+                      <div class="metaRow" id="pPlace"></div>
+                      <div class="metaRow" id="pCoords"></div>
+                      <div class="metaRow" id="pDatetime"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- /poster -->
+          </div><!-- /previewScale -->
+        </div><!-- /previewStage -->
+      </div>
+    </main>
+
+    <aside class="editorDock">
+      <div class="sheet">
+        <div class="sheetTabs" id="tabs"></div>
+        <div class="sheetBody noScrollBar">
+          <div class="card" id="sectionContainer"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
