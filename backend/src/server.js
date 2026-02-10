@@ -87,10 +87,10 @@ app.post("/api/create-checkout-session", async (req, res) => {
     // Precios por tamaño (centavos)
     const currency = String(process.env.CURRENCY || "mxn").toLowerCase();
     const prices = {
-      S: Number(process.env.PRICE_S_CENTS || 19900),
-      M: Number(process.env.PRICE_M_CENTS || 29900),
-      L: Number(process.env.PRICE_L_CENTS || 39900),
-      XL: Number(process.env.PRICE_XL_CENTS || 49900),
+      S: Number(process.env.PRICE_S_CENTS || 20),
+      M: Number(process.env.PRICE_M_CENTS || 20),
+      L: Number(process.env.PRICE_L_CENTS || 20),
+      XL: Number(process.env.PRICE_XL_CENTS || 20),
     };
     const unitAmount = prices[sizeKey] || prices.S;
 
