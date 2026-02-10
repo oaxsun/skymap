@@ -89,38 +89,33 @@
   </div>
 
   <script>
-    (function () {
-      const params = new URLSearchParams(window.location.search);
-      let sid = params.get("session_id") || "";
-      // Si por alguna razón viene "cs_test_... ?session_id=cs_test_..." nos quedamos con lo primero
-      sid = sid.split("?")[0].split("&")[0].trim();
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    let sid = params.get("session_id") || "";
+    sid = sid.split("?")[0].split("&")[0].trim();
 
+    const continueBtn = document.getElementById("continueBtn");
+    const backLink = document.getElementById("backLink");
 
-      const sidBox = document.getElementById("sidBox");
-      const sidText = document.getElementById("sidText");
-      const continueBtn = document.getElementById("continueBtn");
-      const backLink = document.getElementById("backLink");
+    function goStep3() {
+      const url = sid
+        ? `generator.html?step=3&session_id=${encodeURIComponent(sid)}`
+        : `generator.html?step=3`;
+      window.location.replace(url);
+    }
 
-      // Mostrar session_id (opcional, útil para debug)
-      if (sid) {
-        sidBox.style.display = "block";
-        sidText.textContent = sid;
-      }
+    // 1) Botón continuar -> paso 3
+    continueBtn.addEventListener("click", goStep3);
 
-      function goGenerator() {
-        const url = sid
-          ? `generator.html?session_id=${encodeURIComponent(sid)}`
-          : "generator.html";
-        window.location.href = url;
-      }
+    // 2) Link volver -> paso 3 (por si lo usan)
+    backLink.href = sid
+      ? `generator.html?step=3&session_id=${encodeURIComponent(sid)}`
+      : `generator.html?step=3`;
 
-      continueBtn.addEventListener("click", goGenerator);
+    // 3) Auto-redirect (para que aunque “cierren” o no toquen nada, caiga a paso 3)
+    setTimeout(goStep3, 1200);
+  })();
+</script>
 
-      // También actualiza el link "Volver" para conservar session_id
-      backLink.href = sid
-        ? `generator.html?session_id=${encodeURIComponent(sid)}`
-        : "generator.html";
-    })();
-  </script>
 </body>
 </html>
