@@ -91,7 +91,10 @@
   <script>
     (function () {
       const params = new URLSearchParams(window.location.search);
-      const sid = params.get("session_id");
+      let sid = params.get("session_id") || "";
+      // Si por alguna razón viene "cs_test_... ?session_id=cs_test_..." nos quedamos con lo primero
+      sid = sid.split("?")[0].split("&")[0].trim();
+
 
       const sidBox = document.getElementById("sidBox");
       const sidText = document.getElementById("sidText");
