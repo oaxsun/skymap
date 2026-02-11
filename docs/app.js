@@ -1902,9 +1902,15 @@
     const sessionId = qp.get("session_id");
     if (!sessionId) return;
 
+    // ✅ Si vienes de Stripe (success_url), manda al usuario directo al Paso 3
+    state.step = 2;
+    state.export.sessionId = sessionId;
+    state.export.verifying = true;
+
     // Verificación no bloqueante: habilita UI si Stripe confirma
     ensurePaidFromUrl().then((ok) => {
-      if (ok) renderAll();
+      state.export.verifying = false;
+      renderAll();
     });
   }
 
@@ -2194,8 +2200,8 @@ const input = opt.querySelector("input");
     const buyBtn = document.createElement("button");
     buyBtn.type = "button";
     buyBtn.className = "btn primary";
-    buyBtn.textContent = state.export.paid ? "Pago confirmado ✓" : "Comprar";
-    buyBtn.disabled = !!state.export.paid;
+    buyBtn.textContent = state.export.paid ? "Pago confirmado ✓" : (state.export.verifying ? "Verificando pago…" : "Comprar");
+    buyBtn.disabled = !!state.export.paid || !!state.export.verifying;
 
     buyBtn.onclick = async () => {
       try{
