@@ -2111,6 +2111,30 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     note.style.color = "rgba(233,238,252,.70)";
     note.textContent = "Una vez realizado tu pago, el botón de descarga se habilitará y podrás obtener tu poster.";
 
+    // Formato (selector simple)
+    const formatRow = document.createElement("div");
+    formatRow.className = "formRow";
+    formatRow.innerHTML = `<div class="label">Formato</div>`;
+
+    const formatSel = document.createElement("select");
+    formatSel.className = "select";
+    [
+      { key: "pdf", label: "PDF" },
+      { key: "png", label: "PNG" },
+    ].forEach(f => {
+      const opt = document.createElement("option");
+      opt.value = f.key;
+      opt.textContent = f.label;
+      formatSel.appendChild(opt);
+    });
+    formatSel.value = state.export.format;
+    formatSel.onchange = () => {
+      state.export.format = formatSel.value;
+    };
+    formatRow.appendChild(formatSel);
+
+    
+
     // Tamaño (selector estilo mockup: radio real + tamaño + medidas + precio)
     const sizeRow = document.createElement("div");
     sizeRow.className = "formRow";
@@ -2141,7 +2165,7 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
           <span class="sizeRadio" aria-hidden="true"></span>
           <div class="sizeKey">${sz.key}</div>
           <div class="sizeMeta">${sz.sub}</div>
-          <div class="sizePrice" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="sizePrice">
             <div class="sizeWas">${was} ${PRICE_CCY}</div>
             <div class="sizeNow">
               <span class="sizeNowValue">${PRICE_NOW}</span>
@@ -2171,28 +2195,6 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
 
     renderSizeList();
     sizeRow.appendChild(sizeList);
-
-    // Formato (selector simple)
-    const formatRow = document.createElement("div");
-    formatRow.className = "formRow";
-    formatRow.innerHTML = `<div class="label">Formato</div>`;
-
-    const formatSel = document.createElement("select");
-    formatSel.className = "select";
-    [
-      { key: "pdf", label: "PDF" },
-      { key: "png", label: "PNG" },
-    ].forEach(f => {
-      const opt = document.createElement("option");
-      opt.value = f.key;
-      opt.textContent = f.label;
-      formatSel.appendChild(opt);
-    });
-    formatSel.value = state.export.format;
-    formatSel.onchange = () => {
-      state.export.format = formatSel.value;
-    };
-    formatRow.appendChild(formatSel);
 
     // Sección de pago: Anterior + Comprar en la misma línea y centrados como grupo (según maquetado)
     const payRow = document.createElement("div");
