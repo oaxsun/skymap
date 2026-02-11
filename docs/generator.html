@@ -10,18 +10,18 @@
        ========================= -->
 <meta content="Genera tu mapa estelar personalizado: fecha, lugar, estilo, texto y exportación en alta calidad." name="description"/>
 <meta content="index,follow" name="robots"/>
-<link href="https://skymap.oaxsun.tech/generator.html" rel="canonical"/>
+<link href="https://TU-DOMINIO.com/generator.html" rel="canonical"/>
 <!-- Open Graph -->
 <meta content="website" property="og:type"/>
 <meta content="Generador de mapa estelar | Mapa Estelar" property="og:title"/>
 <meta content="Crea y exporta tu mapa estelar personalizado en alta calidad." property="og:description"/>
-<meta content="https://skymap.oaxsun.tech/generator.html" property="og:url"/>
-<meta content="https://skymap.oaxsun.tech/og-image.jpg" property="og:image"/>
+<meta content="https://TU-DOMINIO.com/generator.html" property="og:url"/>
+<meta content="https://TU-DOMINIO.com/og-image.jpg" property="og:image"/>
 <!-- Twitter -->
 <meta content="summary_large_image" name="twitter:card"/>
 <meta content="Generador de mapa estelar | Mapa Estelar" name="twitter:title"/>
 <meta content="Genera tu mapa estelar personalizado y expórtalo en alta calidad." name="twitter:description"/>
-<meta content="https://skymap.oaxsun.tech/og-image.jpg" name="twitter:image"/>
+<meta content="https://TU-DOMINIO.com/og-image.jpg" name="twitter:image"/>
 <!-- JSON-LD -->
 <script type="application/ld+json">
   {
@@ -734,7 +734,116 @@
       width: 100%;
     }
 
-  </style>
+  
+/* ===== Step 3: Size selector (radio cards) ===== */
+.sizeList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+}
+
+.sizeOption{
+  display:grid;
+  grid-template-columns: 22px 22px 44px 1fr auto;
+  align-items:center;
+  gap:10px;
+  padding:14px 14px;
+  border:1px solid rgba(233,238,252,.10);
+  border-radius:14px;
+  background: rgba(12,15,21,.55);
+  cursor:pointer;
+  user-select:none;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.sizeOption:hover{
+  border-color: rgba(124,255,250,.22);
+  background: rgba(15,18,26,.65);
+}
+
+.sizeOption.active{
+  border-color: rgba(124,255,250,.55);
+  background: rgba(124,255,250,.08);
+  box-shadow: 0 0 0 1px rgba(124,255,250,.12) inset;
+}
+
+.sizeRadioInput{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+
+.sizeRadio{
+  width:18px;
+  height:18px;
+  border-radius:999px;
+  border:2px solid rgba(233,238,252,.25);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.sizeOption.active .sizeRadio{
+  border-color: rgba(124,255,250,.9);
+}
+
+.sizeRadio::after{
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  background: rgba(124,255,250,.95);
+  opacity:0;
+  transform: scale(.85);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.sizeOption.active .sizeRadio::after{
+  opacity:1;
+  transform: scale(1);
+}
+
+.sizeKey{
+  font-weight:800;
+  letter-spacing:.3px;
+}
+
+.sizeMeta{
+  color: rgba(233,238,252,.70);
+  font-size: 13px;
+}
+
+.sizePrice{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:4px;
+}
+
+.sizeWas{
+  font-size:12px;
+  color: rgba(233,238,252,.55);
+  text-decoration: line-through;
+}
+
+.sizeNow{
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+}
+
+.sizeNowValue{
+  font-size:16px;
+  font-weight:900;
+}
+
+.sizeNowCcy{
+  font-size:12px;
+  color: rgba(233,238,252,.70);
+}
+
+</style>
 </head>
 <body>
 <div id="app">
@@ -742,8 +851,8 @@
 <div class="brand">
         <div class="dot"></div>
         <div class="brandText">
-          <div class="brandTitle">STELLR SkyMap</div>
-          <div class="brandSub">v2.1102a</div>
+          <div class="brandTitle">STELLR Skymap Generator</div>
+          <div class="brandSub">v2.1202a</div>
         </div>
       </div>
       <div class="topbarRight">© OAXSUN Technologies 2026</div>
