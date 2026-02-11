@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<title>Generador | STELLR SkyMap</title>
+<title>STELLR SkyMap</title>
 <!-- =========================
        SEO BASICO
        ========================= -->
@@ -530,6 +530,91 @@
       border-radius:12px;
       outline:none;
     }
+
+    /* Tamaño (radio options) — Paso 3 */
+    .sizeOptions{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .sizeOpt{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(233,238,252,.10);
+      background: rgba(255,255,255,.02);
+      cursor:pointer;
+      user-select:none;
+      transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    }
+    .sizeOpt:hover{ transform: translateY(-1px); }
+    .sizeOpt.isActive{
+      border-color: rgba(124,255,250,.35);
+      background: rgba(124,255,250,.08);
+    }
+    .sizeOpt__input{
+      position:absolute;
+      inset:0;
+      opacity:0;
+      pointer-events:none;
+    }
+    .sizeOpt__left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+      flex:1;
+    }
+    .sizeOpt__dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      border:2px solid rgba(233,238,252,.22);
+      background: transparent;
+      box-shadow: 0 0 0 4px rgba(124,255,250,.0);
+      flex: 0 0 auto;
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .sizeOpt.isActive .sizeOpt__dot{
+      border-color: rgba(124,255,250,.85);
+      background: var(--accentSolid);
+      box-shadow: 0 0 0 4px rgba(124,255,250,.16);
+    }
+    .sizeOpt__text{ min-width:0; }
+    .sizeOpt__top{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      min-width:0;
+    }
+    .sizeOpt__key{
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:.3px;
+    }
+    .sizeOpt__sub{
+      font-size:12px;
+      color: var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .sizeOpt__old{
+      margin-top:3px;
+      font-size:11px;
+      color: rgba(233,238,252,.55);
+      text-decoration: line-through;
+    }
+    .sizeOpt__price{
+      font-size:13px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
     input[type="range"]{ width:100%; }
 
     .styleGrid{
@@ -734,7 +819,59 @@
       width: 100%;
     }
 
-  </style>
+  /* ===== Step 3: Size selector (radio buttons) ===== */
+.sizeOptions{display:flex;flex-direction:column;gap:12px;margin-top:10px;}
+
+.sizeOpt{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 14px;
+  border:1px solid rgba(233,238,252,.10);
+  border-radius:14px;
+  background: rgba(12,15,21,.55);
+  cursor:pointer;
+  user-select:none;
+  transition:border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.sizeOpt:hover{border-color: rgba(124,255,250,.22);background: rgba(15,18,26,.65);}
+.sizeOpt.isActive{
+  border-color: rgba(124,255,250,.55);
+  background: rgba(124,255,250,.08);
+  box-shadow:0 0 0 1px rgba(124,255,250,.12) inset;
+}
+
+.sizeOpt__input{position:absolute;opacity:0;pointer-events:none;}
+
+.sizeOpt__left{display:flex;align-items:center;gap:12px;min-width:0;}
+.sizeOpt__dot{
+  width:18px;height:18px;border-radius:999px;
+  border:2px solid rgba(233,238,252,.25);
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 auto;
+}
+.sizeOpt.isActive .sizeOpt__dot{border-color: rgba(124,255,250,.9);}
+.sizeOpt__dot::after{
+  content:"";width:8px;height:8px;border-radius:999px;
+  background: rgba(124,255,250,.95);
+  opacity:0;transform:scale(.85);
+  transition:opacity .18s ease, transform .18s ease;
+}
+.sizeOpt.isActive .sizeOpt__dot::after{opacity:1;transform:scale(1);}
+
+.sizeOpt__content{display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:0;width:100%;}
+.sizeOpt__priceLine{display:flex;align-items:baseline;gap:6px;line-height:1;}
+.sizeOpt__priceLine .sizeOpt__priceValue{font-size:16px;font-weight:900;}
+.sizeOpt__priceLine .sizeOpt__priceCcy{font-size:12px;color: rgba(233,238,252,.70);}
+
+.sizeOpt__metaLine{display:flex;align-items:baseline;gap:10px;line-height:1.1;white-space:nowrap;}
+.sizeOpt__old{font-size:12px;color: rgba(233,238,252,.55);text-decoration:line-through;}
+.sizeOpt__subLine{font-size:13px;color: rgba(233,238,252,.78);}
+.sizeOpt__keyInline{font-weight:800;letter-spacing:.3px;margin-right:4px;}
+
+</style>
 </head>
 <body>
 <div id="app">
@@ -742,8 +879,8 @@
 <div class="brand">
         <div class="dot"></div>
         <div class="brandText">
-          <div class="brandTitle">STELLR SkyMap</div>
-          <div class="brandSub">v2.120226c</div>
+          <div class="brandTitle">STELLR Skymap Generator</div>
+          <div class="brandSub">v2.1202a</div>
         </div>
       </div>
       <div class="topbarRight">© OAXSUN Technologies 2026</div>
