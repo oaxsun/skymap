@@ -4,24 +4,24 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<title>Generador | STELLR Skymap generator</title>
+<title>STELLR SkyMap</title>
 <!-- =========================
        SEO BASICO
        ========================= -->
 <meta content="Genera tu mapa estelar personalizado: fecha, lugar, estilo, texto y exportación en alta calidad." name="description"/>
 <meta content="index,follow" name="robots"/>
-<link href="https://TU-DOMINIO.com/generator.html" rel="canonical"/>
+<link href="https://skymap.oaxsun.tech/generator.html" rel="canonical"/>
 <!-- Open Graph -->
 <meta content="website" property="og:type"/>
 <meta content="Generador de mapa estelar | Mapa Estelar" property="og:title"/>
 <meta content="Crea y exporta tu mapa estelar personalizado en alta calidad." property="og:description"/>
-<meta content="https://TU-DOMINIO.com/generator.html" property="og:url"/>
-<meta content="https://TU-DOMINIO.com/og-image.jpg" property="og:image"/>
+<meta content="https://skymap.oaxsun.tech/generator.html" property="og:url"/>
+<meta content="https://skymap.oaxsun.tech/og-image.jpg" property="og:image"/>
 <!-- Twitter -->
 <meta content="summary_large_image" name="twitter:card"/>
 <meta content="Generador de mapa estelar | Mapa Estelar" name="twitter:title"/>
 <meta content="Genera tu mapa estelar personalizado y expórtalo en alta calidad." name="twitter:description"/>
-<meta content="https://TU-DOMINIO.com/og-image.jpg" name="twitter:image"/>
+<meta content="https://skymap.oaxsun.tech/og-image.jpg" name="twitter:image"/>
 <!-- JSON-LD -->
 <script type="application/ld+json">
   {
@@ -530,91 +530,6 @@
       border-radius:12px;
       outline:none;
     }
-
-    /* Tamaño (radio options) — Paso 3 */
-    .sizeOptions{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .sizeOpt{
-      position:relative;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(233,238,252,.10);
-      background: rgba(255,255,255,.02);
-      cursor:pointer;
-      user-select:none;
-      transition: border-color .15s ease, background .15s ease, transform .15s ease;
-    }
-    .sizeOpt:hover{ transform: translateY(-1px); }
-    .sizeOpt.isActive{
-      border-color: rgba(124,255,250,.35);
-      background: rgba(124,255,250,.08);
-    }
-    .sizeOpt__input{
-      position:absolute;
-      inset:0;
-      opacity:0;
-      pointer-events:none;
-    }
-    .sizeOpt__left{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-      flex:1;
-    }
-    .sizeOpt__dot{
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      border:2px solid rgba(233,238,252,.22);
-      background: transparent;
-      box-shadow: 0 0 0 4px rgba(124,255,250,.0);
-      flex: 0 0 auto;
-      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
-    }
-    .sizeOpt.isActive .sizeOpt__dot{
-      border-color: rgba(124,255,250,.85);
-      background: var(--accentSolid);
-      box-shadow: 0 0 0 4px rgba(124,255,250,.16);
-    }
-    .sizeOpt__text{ min-width:0; }
-    .sizeOpt__top{
-      display:flex;
-      align-items:baseline;
-      gap:10px;
-      min-width:0;
-    }
-    .sizeOpt__key{
-      font-size:18px;
-      font-weight:900;
-      letter-spacing:.3px;
-    }
-    .sizeOpt__sub{
-      font-size:12px;
-      color: var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .sizeOpt__old{
-      margin-top:3px;
-      font-size:11px;
-      color: rgba(233,238,252,.55);
-      text-decoration: line-through;
-    }
-    .sizeOpt__price{
-      font-size:13px;
-      font-weight:900;
-      white-space:nowrap;
-    }
-
     input[type="range"]{ width:100%; }
 
     .styleGrid{
@@ -827,8 +742,8 @@
 <div class="brand">
         <div class="dot"></div>
         <div class="brandText">
-          <div class="brandTitle">STELLR Skymap Generator</div>
-          <div class="brandSub">v2.1202a</div>
+          <div class="brandTitle">STELLR SkyMap</div>
+          <div class="brandSub">v2.1102a</div>
         </div>
       </div>
       <div class="topbarRight">© OAXSUN Technologies 2026</div>
