@@ -111,11 +111,11 @@
     { id: "neonRose",  name: "Neón Rosa" },
   ];
 
-  const EXPORT_SIZES = [
-    { key: "S",  title: "S",  sub: "21 cm x 29.7 cm (A4)",   type: "cm", w: 21,   h: 29.7 },
-    { key: "M",  title: "M",  sub: "42 cm x 59.4 cm (A2)",   type: "cm", w: 42,   h: 59.4 },
-    { key: "L",  title: "L",  sub: "59.4 cm x 84.1 cm (A1)", type: "cm", w: 59.4, h: 84.1 },
-    { key: "XL", title: "XL", sub: "84.1 cm x 118.9 cm (A0)",type: "cm", w: 84.1, h: 118.9 }
+    const EXPORT_SIZES = [
+    { key: "S",  title: "S",  sub: "21 cm x 29.7 cm (A4)",   type: "cm", w: 21,   h: 29.7,  oldPrice: 99,  price: 20 },
+    { key: "M",  title: "M",  sub: "42 cm x 59.4 cm (A2)",   type: "cm", w: 42,   h: 59.4, oldPrice: 149, price: 20 },
+    { key: "L",  title: "L",  sub: "59.4 cm x 84.1 cm (A1)", type: "cm", w: 59.4, h: 84.1, oldPrice: 199, price: 20 },
+    { key: "XL", title: "XL", sub: "84.1 cm x 118.9 cm (A0)",type: "cm", w: 84.1, h: 118.9, oldPrice: 249, price: 20 }
   ];
 
   const $poster = document.getElementById("poster");
@@ -2111,59 +2111,55 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     note.style.color = "rgba(233,238,252,.70)";
     note.textContent = "Una vez realizado tu pago, el botón de descarga se habilitará y podrás obtener tu poster.";
 
-    
-// Tamaño (radio cards)
-const sizeRow = document.createElement("div");
-sizeRow.className = "formRow";
-sizeRow.innerHTML = `<div class="label">Tamaño</div>`;
+    // Tamaño (radio buttons)
+    const sizeRow = document.createElement("div");
+    sizeRow.className = "formRow";
+    sizeRow.innerHTML = `<div class="label">Tamaño</div>`;
 
-const sizeList = document.createElement("div");
-sizeList.className = "sizeList";
+    const sizeGroup = document.createElement("div");
+    sizeGroup.className = "sizeOptions";
 
-const getPaperCode = (sub) => {
-  const mm = String(sub || "").match(/\(([^)]+)\)\s*$/);
-  return mm ? mm[1] : String(sub || "");
-};
+    const formatMoneyMXN = (n) => {
+      try {
+        return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(Number(n));
+      } catch {
+        return `$${Number(n).toFixed(2)} MXN`;
+      }
+    };
 
-const updateSizeActive = () => {
-  sizeList.querySelectorAll(".sizeOption").forEach(el => {
-    el.classList.toggle("active", el.dataset.key === state.export.sizeKey);
-    const radio = el.querySelector('input[type="radio"]');
-    if (radio) radio.checked = (el.dataset.key === state.export.sizeKey);
-  });
-};
+    EXPORT_SIZES.forEach(sz => {
+      const opt = document.createElement("label");
+      opt.className = "sizeOpt" + (state.export.sizeKey === sz.key ? " isActive" : "");
+      opt.innerHTML = `
+        <input class="sizeOpt__input" type="radio" name="exportSize" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""}/>
 
-EXPORT_SIZES.forEach((sz) => {
-  const opt = document.createElement("label");
-  opt.className = "sizeOption";
-  opt.dataset.key = sz.key;
+        <div class="sizeOpt__left">
+          <div class="sizeOpt__dot" aria-hidden="true"></div>
+        </div>
 
-  const paper = getPaperCode(sz.sub); // Solo A4 / A2 / A1 / A0
+        <div class="sizeOpt__content">
+          <div class="sizeOpt__priceLine">
+            <span class="sizeOpt__priceValue">${formatMoneyMXN(sz.price ?? "")}</span>
+          </div>
 
-  opt.innerHTML = `
-    <input class="sizeRadioInput" type="radio" name="exportSize" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""} />
-    <span class="sizeRadio" aria-hidden="true"></span>
-    <div class="sizeKey">${sz.key}</div>
-    <div class="sizeMeta">${paper}</div>
-    <div class="sizePrice">
-      <div class="sizeWas">$99.00 <span class="sizeNowCcy">MXN</span></div>
-      <div class="sizeNow">
-        <span class="sizeNowValue">$20.00</span>
-        <span class="sizeNowCcy">MXN</span>
-      </div>
-    </div>
-  `;
+          <div class="sizeOpt__metaLine">
+            <span class="sizeOpt__old">${formatMoneyMXN(sz.oldPrice ?? "")}</span>
+            <span class="sizeOpt__subLine"><span class="sizeOpt__keyInline">${sz.title || sz.key}</span>${sz.sub}</span>
+          </div>
+        </div>
+      `;
+const input = opt.querySelector("input");
+      input.onchange = () => {
+        state.export.sizeKey = input.value;
+        renderAll();
+      };
 
-  opt.addEventListener("click", () => {
-    state.export.sizeKey = sz.key;
-    updateSizeActive();
-  });
+      sizeGroup.appendChild(opt);
+    });
 
-  sizeList.appendChild(opt);
-});
+    sizeRow.appendChild(sizeGroup);
 
-sizeRow.appendChild(sizeList);
-
+    // Formato (selector simple)
     const formatRow = document.createElement("div");
     formatRow.className = "formRow";
     formatRow.innerHTML = `<div class="label">Formato</div>`;
