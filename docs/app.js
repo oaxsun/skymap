@@ -1902,15 +1902,9 @@
     const sessionId = qp.get("session_id");
     if (!sessionId) return;
 
-    // ✅ Si vienes de Stripe (success_url), manda al usuario directo al Paso 3
-    state.step = 2;
-    state.export.sessionId = sessionId;
-    state.export.verifying = true;
-
     // Verificación no bloqueante: habilita UI si Stripe confirma
     ensurePaidFromUrl().then((ok) => {
-      state.export.verifying = false;
-      renderAll();
+      if (ok) renderAll();
     });
   }
 
@@ -1941,7 +1935,22 @@
     const pdfBlob = await r.blob();
     const url = URL.createObjectURL(pdfBlob);
 
-    window.open(url, "_blank", "noopener,noreferrer");
+    // Descarga directa (sin ventana emergente)
+    const cd = r.headers.get("Content-Disposition") || "";
+    let filename = "skymap.pdf";
+    const mStar = cd.match(/filename\*=UTF-8''([^;]+)/i);
+    const mPlain = cd.match(/filename="([^"]+)"/i) || cd.match(/filename=([^;]+)/i);
+    if (mStar && mStar[1]) filename = decodeURIComponent(mStar[1].trim());
+    else if (mPlain && mPlain[1]) filename = mPlain[1].trim().replace(/^"|"$/g, "");
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
@@ -2200,8 +2209,8 @@ const input = opt.querySelector("input");
     const buyBtn = document.createElement("button");
     buyBtn.type = "button";
     buyBtn.className = "btn primary";
-    buyBtn.textContent = state.export.paid ? "Pago confirmado ✓" : (state.export.verifying ? "Verificando pago…" : "Comprar");
-    buyBtn.disabled = !!state.export.paid || !!state.export.verifying;
+    buyBtn.textContent = state.export.paid ? "Pago confirmado ✓" : "Comprar";
+    buyBtn.disabled = !!state.export.paid;
 
     buyBtn.onclick = async () => {
       try{
