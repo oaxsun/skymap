@@ -2131,23 +2131,18 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
       const opt = document.createElement("label");
       opt.className = "sizeOpt" + (state.export.sizeKey === sz.key ? " isActive" : "");
       opt.innerHTML = `
-        <input class="sizeOpt__input" type="radio" name="exportSize" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""}/>
-
-        <div class="sizeOpt__left">
-          <div class="sizeOpt__dot" aria-hidden="true"></div>
-        </div>
-
-        <div class="sizeOpt__content">
-          <div class="sizeOpt__priceLine">
-            <span class="sizeOpt__priceValue">${formatMoneyMXN(sz.price ?? "")}</span>
-          </div>
-
-          <div class="sizeOpt__metaLine">
-            <span class="sizeOpt__old">${formatMoneyMXN(sz.oldPrice ?? "")}</span>
-            <span class="sizeOpt__subLine"><span class="sizeOpt__keyInline">${sz.title || sz.key}</span>${sz.sub}</span>
-          </div>
-        </div>
-      `;
+  <input class="sizeRadioInput" type="radio" name="exportSize" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""} />
+  <span class="sizeRadio" aria-hidden="true"></span>
+  <div class="sizeKey">${sz.key}</div>
+  <div class="sizeMeta">${paper}</div>
+  <div class="sizePrice">
+    <div class="sizeWas">$99.00 <span class="sizeNowCcy">MXN</span></div>
+    <div class="sizeNow">
+      <span class="sizeNowValue">$20.00</span>
+      <span class="sizeNowCcy">MXN</span>
+    </div>
+  </div>
+`;
 const input = opt.querySelector("input");
       input.onchange = () => {
         state.export.sizeKey = input.value;
