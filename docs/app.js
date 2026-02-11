@@ -1906,7 +1906,35 @@
     ensurePaidFromUrl().then((ok) => {
       if (ok) renderAll();
     });
+  
+  function initStepFromUrl(){
+    const qp = new URLSearchParams(window.location.search);
+
+    // step viene como 1,2,3 (humano). Convertimos a 0,1,2 (índice).
+    const stepParam = qp.get("step");
+    const sessionId = qp.get("session_id");
+
+    let target = null;
+
+    if (stepParam){
+      const n = parseInt(stepParam, 10);
+      if (!Number.isNaN(n) && n >= 1 && n <= STEPS.length){
+        target = n - 1;
+      }
+    }
+
+    // Si viene un session_id (retorno de Stripe), forzamos Step 3 para evitar confusión
+    if (sessionId){
+      target = 2; // Step 3 (Exportar/Descargar)
+    }
+
+    if (target !== null){
+      state.step = target;
+    }
   }
+
+
+}
 
 
   async function downloadPDFfromCanvas(posterCanvas, Wpx, Hpx, dpi, filename){
@@ -1935,7 +1963,12 @@
     const pdfBlob = await r.blob();
     const url = URL.createObjectURL(pdfBlob);
 
-    window.open(url, "_blank", "noopener,noreferrer");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename || "stellr-skymap.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
@@ -2296,6 +2329,7 @@ const input = opt.querySelector("input");
 
   // Init
   restoreCheckoutDraftIfAny();
+  initStepFromUrl();
   initPaidStateFromUrl();
   updateSeedFromDateTime();
   ensurePosterLayers();
