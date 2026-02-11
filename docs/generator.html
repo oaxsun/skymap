@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<title>Generador | STELLR Skymap generator</title>
+<title>STELLR SkyMap</title>
 <!-- =========================
        SEO BASICO
        ========================= -->
@@ -734,7 +734,15 @@
       width: 100%;
     }
 
-  .sizeOption{
+  
+/* ===== Step 3: Size selector (radio cards) ===== */
+.sizeList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+}
+.sizeOption{
   display:grid;
   grid-template-columns: 22px 22px 34px 1fr auto;
   align-items:center;
@@ -747,12 +755,45 @@
   user-select:none;
   transition: border-color .18s ease, background .18s ease, transform .18s ease;
 }
-.sizePrice{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:4px;
-  white-space:nowrap;
+.sizeOption:hover{
+  border-color: rgba(124,255,250,.22);
+  background: rgba(15,18,26,.65);
+}
+.sizeOption.active{
+  border-color: rgba(124,255,250,.55);
+  background: rgba(124,255,250,.08);
+  box-shadow: 0 0 0 1px rgba(124,255,250,.12) inset;
+}
+.sizeRadioInput{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.sizeRadio{
+  width:18px;
+  height:18px;
+  border-radius:999px;
+  border:2px solid rgba(233,238,252,.25);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.sizeOption.active .sizeRadio{
+  border-color: rgba(124,255,250,.9);
+}
+.sizeRadio::after{
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  background: rgba(124,255,250,.95);
+  opacity:0;
+  transform: scale(.85);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.sizeOption.active .sizeRadio::after{
+  opacity:1;
+  transform: scale(1);
 }
 .sizeKey{
   font-weight:800;
@@ -764,6 +805,32 @@
   font-size: 13px;
   white-space:nowrap;
 }
+.sizePrice{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:4px;
+  white-space:nowrap;
+}
+.sizeWas{
+  font-size:12px;
+  color: rgba(233,238,252,.55);
+  text-decoration: line-through;
+}
+.sizeNow{
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+}
+.sizeNowValue{
+  font-size:16px;
+  font-weight:900;
+}
+.sizeNowCcy{
+  font-size:12px;
+  color: rgba(233,238,252,.70);
+}
+
 </style>
 </head>
 <body>
@@ -772,8 +839,8 @@
 <div class="brand">
         <div class="dot"></div>
         <div class="brandText">
-          <div class="brandTitle">STELLR Skymap Generator</div>
-          <div class="brandSub">v2.1202a</div>
+          <div class="brandTitle">STELLR SkyMap</div>
+          <div class="brandSub">v2.1202d</div>
         </div>
       </div>
       <div class="topbarRight">© OAXSUN Technologies 2026</div>
