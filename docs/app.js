@@ -112,10 +112,10 @@
   ];
 
   const EXPORT_SIZES = [
-    { key: "S",  title: "S",  sub: "21 cm x 29.7 cm (A4)",   type: "cm", w: 21,   h: 29.7 },
-    { key: "M",  title: "M",  sub: "42 cm x 59.4 cm (A2)",   type: "cm", w: 42,   h: 59.4 },
-    { key: "L",  title: "L",  sub: "59.4 cm x 84.1 cm (A1)", type: "cm", w: 59.4, h: 84.1 },
-    { key: "XL", title: "XL", sub: "84.1 cm x 118.9 cm (A0)",type: "cm", w: 84.1, h: 118.9 }
+    { key: "S",  title: "S",  sub: "(A4)",   type: "cm", w: 21,   h: 29.7 },
+    { key: "M",  title: "M",  sub: "(A2)",   type: "cm", w: 42,   h: 59.4 },
+    { key: "L",  title: "L",  sub: "(A1)", type: "cm", w: 59.4, h: 84.1 },
+    { key: "XL", title: "XL", sub: "(A0)",type: "cm", w: 84.1, h: 118.9 }
   ];
 
   const $poster = document.getElementById("poster");
