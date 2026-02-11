@@ -80,7 +80,7 @@
   const STEPS = [
     { key: "design", label: "Diseño" },
     { key: "content", label: "Contenido" },
-    { key: "export", label: "Exportar" },
+    { key: "export", label: "Descargar" },
   ];
 
   const MAP_STYLES = [
@@ -112,10 +112,10 @@
   ];
 
   const EXPORT_SIZES = [
-    { key: "S",  title: "S",  sub: "(A4)",   type: "cm", w: 21,   h: 29.7 },
-    { key: "M",  title: "M",  sub: "(A2)",   type: "cm", w: 42,   h: 59.4 },
-    { key: "L",  title: "L",  sub: "(A1)", type: "cm", w: 59.4, h: 84.1 },
-    { key: "XL", title: "XL", sub: "(A0)",type: "cm", w: 84.1, h: 118.9 }
+    { key: "S",  title: "S",  sub: "21 cm x 29.7 cm (A4)",   type: "cm", w: 21,   h: 29.7 },
+    { key: "M",  title: "M",  sub: "42 cm x 59.4 cm (A2)",   type: "cm", w: 42,   h: 59.4 },
+    { key: "L",  title: "L",  sub: "59.4 cm x 84.1 cm (A1)", type: "cm", w: 59.4, h: 84.1 },
+    { key: "XL", title: "XL", sub: "84.1 cm x 118.9 cm (A0)",type: "cm", w: 84.1, h: 118.9 }
   ];
 
   const $poster = document.getElementById("poster");
@@ -2111,6 +2111,29 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     note.style.color = "rgba(233,238,252,.70)";
     note.textContent = "Una vez realizado tu pago, el botón de descarga se habilitará y podrás obtener tu poster.";
 
+    // Tamaño (picker estilo "Formato")
+    const sizeRow = document.createElement("div");
+    sizeRow.className = "formRow";
+    sizeRow.innerHTML = `<div class="label">Tamaño</div>`;
+
+    const sizeSel = document.createElement("select");
+    sizeSel.className = "select";
+
+    // Opciones: S/M/L/XL + medidas
+    EXPORT_SIZES.forEach(sz => {
+      const opt = document.createElement("option");
+      opt.value = sz.key;
+      opt.textContent = `${sz.key} — ${sz.sub}`;
+      sizeSel.appendChild(opt);
+    });
+
+    sizeSel.value = state.export.sizeKey;
+    sizeSel.onchange = () => {
+      state.export.sizeKey = sizeSel.value;
+    };
+
+    sizeRow.appendChild(sizeSel);
+
     // Formato (selector simple)
     const formatRow = document.createElement("div");
     formatRow.className = "formRow";
@@ -2132,69 +2155,6 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
       state.export.format = formatSel.value;
     };
     formatRow.appendChild(formatSel);
-
-    
-
-    // Tamaño (selector estilo mockup: radio real + tamaño + medidas + precio)
-    const sizeRow = document.createElement("div");
-    sizeRow.className = "formRow";
-    sizeRow.innerHTML = `<div class="label">Tamaño</div>`;
-
-    const sizeList = document.createElement("div");
-    sizeList.className = "sizeList";
-
-    // Precio real (Stripe): $20 MXN
-    const PRICE_NOW = "20.00";
-    const PRICE_CCY = "MXN";
-
-    // Precio anterior (solo UI, como maquetado)
-    const PRICE_WAS = { S: "99.00", M: "149.00", L: "199.00", XL: "249.00" };
-
-    function renderSizeList(){
-      sizeList.innerHTML = "";
-      EXPORT_SIZES.forEach((sz, i) => {
-        const label = document.createElement("label");
-        label.className = "sizeOption" + (state.export.sizeKey === sz.key ? " active" : "");
-
-        const was = PRICE_WAS[sz.key] || "";
-
-        // Radio real (solo permite 1 seleccionado)
-        const radioId = `exportSize_${sz.key}`;
-        label.innerHTML = `
-          <input class="sizeRadioInput" type="radio" name="exportSize" id="${radioId}" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""} />
-          <span class="sizeRadio" aria-hidden="true"></span>
-          <div class="sizeKey">${sz.key}</div>
-          <div class="sizeMeta">${sz.sub}</div>
-          <div class="sizePrice">
-            <div class="sizeWas">${was} ${PRICE_CCY}</div>
-            <div class="sizeNow">
-              <span class="sizeNowValue">${PRICE_NOW}</span>
-              <span class="sizeNowCcy">${PRICE_CCY}</span>
-            </div>
-          </div>
-        `;
-
-        // click/keyboard
-        label.addEventListener("change", (e) => {
-          const input = label.querySelector("input.sizeRadioInput");
-          if (input && input.checked) {
-            state.export.sizeKey = sz.key;
-            renderSizeList();
-          }
-        });
-
-        // also allow clicking anywhere
-        label.addEventListener("click", () => {
-          state.export.sizeKey = sz.key;
-          renderSizeList();
-        });
-
-        sizeList.appendChild(label);
-      });
-    }
-
-    renderSizeList();
-    sizeRow.appendChild(sizeList);
 
     // Sección de pago: Anterior + Comprar en la misma línea y centrados como grupo (según maquetado)
     const payRow = document.createElement("div");
@@ -2279,8 +2239,8 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     $section.appendChild(t);
     $section.appendChild(s);
     $section.appendChild(note);
-    $section.appendChild(formatRow);
     $section.appendChild(sizeRow);
+    $section.appendChild(formatRow);
     // ✅ Orden como el maquetado: Anterior/Comprar en una línea, y debajo Descargar
     $section.appendChild(payRow);
     $section.appendChild(downloadRow);
