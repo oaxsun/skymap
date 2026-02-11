@@ -80,7 +80,7 @@
   const STEPS = [
     { key: "design", label: "Diseño" },
     { key: "content", label: "Contenido" },
-    { key: "export", label: "Descargar" },
+    { key: "export", label: "Exportar" },
   ];
 
   const MAP_STYLES = [
@@ -111,11 +111,11 @@
     { id: "neonRose",  name: "Neón Rosa" },
   ];
 
-    const EXPORT_SIZES = [
-    { key: "S",  title: "S",  sub: "21 cm x 29.7 cm (A4)",   type: "cm", w: 21,   h: 29.7,  oldPrice: 99,  price: 20 },
-    { key: "M",  title: "M",  sub: "42 cm x 59.4 cm (A2)",   type: "cm", w: 42,   h: 59.4, oldPrice: 149, price: 20 },
-    { key: "L",  title: "L",  sub: "59.4 cm x 84.1 cm (A1)", type: "cm", w: 59.4, h: 84.1, oldPrice: 199, price: 20 },
-    { key: "XL", title: "XL", sub: "84.1 cm x 118.9 cm (A0)",type: "cm", w: 84.1, h: 118.9, oldPrice: 249, price: 20 }
+  const EXPORT_SIZES = [
+    { key: "S",  title: "S",  sub: "21 cm x 29.7 cm (A4)",   type: "cm", w: 21,   h: 29.7 },
+    { key: "M",  title: "M",  sub: "42 cm x 59.4 cm (A2)",   type: "cm", w: 42,   h: 59.4 },
+    { key: "L",  title: "L",  sub: "59.4 cm x 84.1 cm (A1)", type: "cm", w: 59.4, h: 84.1 },
+    { key: "XL", title: "XL", sub: "84.1 cm x 118.9 cm (A0)",type: "cm", w: 84.1, h: 118.9 }
   ];
 
   const $poster = document.getElementById("poster");
@@ -2111,50 +2111,66 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     note.style.color = "rgba(233,238,252,.70)";
     note.textContent = "Una vez realizado tu pago, el botón de descarga se habilitará y podrás obtener tu poster.";
 
-    // Tamaño (radio buttons)
+    // Tamaño (selector estilo mockup: radio real + tamaño + medidas + precio)
     const sizeRow = document.createElement("div");
     sizeRow.className = "formRow";
     sizeRow.innerHTML = `<div class="label">Tamaño</div>`;
 
-    const sizeGroup = document.createElement("div");
-    sizeGroup.className = "sizeOptions";
+    const sizeList = document.createElement("div");
+    sizeList.className = "sizeList";
 
-    const formatMoneyMXN = (n) => {
-      try {
-        return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(Number(n));
-      } catch {
-        return `$${Number(n).toFixed(2)} MXN`;
-      }
-    };
+    // Precio real (Stripe): $20 MXN
+    const PRICE_NOW = "20.00";
+    const PRICE_CCY = "MXN";
 
-    EXPORT_SIZES.forEach(sz => {
-      const opt = document.createElement("label");
-      opt.className = "sizeOpt" + (state.export.sizeKey === sz.key ? " isActive" : "");
-      opt.innerHTML = `
-        <input class="sizeOpt__input" type="radio" name="exportSize" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""}/>
-        <div class="sizeOpt__left">
-          <div class="sizeOpt__dot"></div>
-          <div class="sizeOpt__text">
-            <div class="sizeOpt__top">
-              <div class="sizeOpt__key">${sz.title || sz.key}</div>
-              <div class="sizeOpt__sub">${sz.sub}</div>
+    // Precio anterior (solo UI, como maquetado)
+    const PRICE_WAS = { S: "99.00", M: "149.00", L: "199.00", XL: "249.00" };
+
+    function renderSizeList(){
+      sizeList.innerHTML = "";
+      EXPORT_SIZES.forEach((sz, i) => {
+        const label = document.createElement("label");
+        label.className = "sizeOption" + (state.export.sizeKey === sz.key ? " active" : "");
+
+        const was = PRICE_WAS[sz.key] || "";
+
+        // Radio real (solo permite 1 seleccionado)
+        const radioId = `exportSize_${sz.key}`;
+        label.innerHTML = `
+          <input class="sizeRadioInput" type="radio" name="exportSize" id="${radioId}" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""} />
+          <span class="sizeRadio" aria-hidden="true"></span>
+          <div class="sizeKey">${sz.key}</div>
+          <div class="sizeMeta">${sz.sub}</div>
+          <div class="sizePrice" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="sizeWas">${was} ${PRICE_CCY}</div>
+            <div class="sizeNow">
+              <span class="sizeNowValue">${PRICE_NOW}</span>
+              <span class="sizeNowCcy">${PRICE_CCY}</span>
             </div>
-            <div class="sizeOpt__old">${formatMoneyMXN(sz.oldPrice ?? "")}</div>
           </div>
-        </div>
-        <div class="sizeOpt__price">${formatMoneyMXN(sz.price ?? "")}</div>
-      `;
+        `;
 
-      const input = opt.querySelector("input");
-      input.onchange = () => {
-        state.export.sizeKey = input.value;
-        renderAll();
-      };
+        // click/keyboard
+        label.addEventListener("change", (e) => {
+          const input = label.querySelector("input.sizeRadioInput");
+          if (input && input.checked) {
+            state.export.sizeKey = sz.key;
+            renderSizeList();
+          }
+        });
 
-      sizeGroup.appendChild(opt);
-    });
+        // also allow clicking anywhere
+        label.addEventListener("click", () => {
+          state.export.sizeKey = sz.key;
+          renderSizeList();
+        });
 
-    sizeRow.appendChild(sizeGroup);
+        sizeList.appendChild(label);
+      });
+    }
+
+    renderSizeList();
+    sizeRow.appendChild(sizeList);
 
     // Formato (selector simple)
     const formatRow = document.createElement("div");
