@@ -1941,9 +1941,28 @@
     const pdfBlob = await r.blob();
     const url = URL.createObjectURL(pdfBlob);
 
-    window.open(url, "_blank", "noopener,noreferrer");
+    // ✅ descarga directa (sin ventana emergente)
+    const cd = r.headers.get("Content-Disposition") || "";
+    let filenameOut = filename || "skymap.pdf";
+
+    const mStar = cd.match(/filename\*=UTF-8''([^;]+)/i);
+    const mQuoted = cd.match(/filename="([^"]+)"/i);
+    const mPlain = cd.match(/filename=([^;]+)/i);
+
+    if (mStar && mStar[1]) filenameOut = decodeURIComponent(mStar[1].trim());
+    else if (mQuoted && mQuoted[1]) filenameOut = mQuoted[1].trim();
+    else if (mPlain && mPlain[1]) filenameOut = mPlain[1].trim().replace(/^"|"$/g, "");
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filenameOut;
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
-  }
+}
 
   async function exportPoster(format, sizeKey){
     const sz = EXPORT_SIZES.find(x => x.key === sizeKey) || EXPORT_SIZES[0];
