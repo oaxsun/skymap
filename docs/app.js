@@ -2279,8 +2279,8 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     $section.appendChild(t);
     $section.appendChild(s);
     $section.appendChild(note);
-    $section.appendChild(formatRow);
     $section.appendChild(sizeRow);
+    $section.appendChild(formatRow);
     // ✅ Orden como el maquetado: Anterior/Comprar en una línea, y debajo Descargar
     $section.appendChild(payRow);
     $section.appendChild(downloadRow);
