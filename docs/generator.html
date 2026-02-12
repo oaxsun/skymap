@@ -871,6 +871,70 @@
 .sizeOpt__subLine{font-size:13px;color: rgba(233,238,252,.78);}
 .sizeOpt__keyInline{font-weight:800;letter-spacing:.3px;margin-right:4px;}
 
+/* ====== OVERRIDE: Size selector format (dot + size + dimensions + old/new price) ====== */
+/* This overrides earlier .sizeOpt* rules (keep at end for cascade). */
+.sizeOpt{
+  align-items: flex-start;
+}
+
+.sizeOpt__left{
+  flex: 0 0 auto;
+}
+
+/* Make content left-aligned and take remaining width */
+.sizeOpt__content{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 10px !important;
+}
+
+/* Top: size key then dimensions */
+.sizeOpt__topLine{
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sizeOpt__key{
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: .3px;
+  line-height: 1.05;
+}
+
+.sizeOpt__dims{
+  font-size: 13px;
+  color: rgba(233,238,252,.78);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Prices: old (struck) above final */
+.sizeOpt__priceStack{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.05;
+}
+
+.sizeOpt__priceStack .sizeOpt__old{
+  margin-top: 0 !important;
+  font-size: 12px;
+  color: rgba(233,238,252,.55);
+  text-decoration: line-through;
+}
+
+.sizeOpt__price{
+  font-size: 18px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 </style>
 </head>
 <body>
