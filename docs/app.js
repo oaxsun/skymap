@@ -2431,7 +2431,9 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     downloadBtn.type = "button";
     downloadBtn.className = "btn primary";
     downloadBtn.style.width = "100%";
-    downloadBtn.innerHTML = state.export.downloading ? `<span class="btnSpinner" aria-hidden="true"></span><span>Descargando…</span>` : "Descargar";
+    downloadBtn.innerHTML = state.export.downloading
+      ? `<span class="btnSpinner" aria-hidden="true"></span><span>Descargando…</span>`
+      : (state.export.locked ? "Volver a descargar" : "Descargar");
     downloadBtn.disabled = (!state.export.paid) || !!state.export.downloading;
 
     if (!state.export.paid){
