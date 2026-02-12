@@ -74,8 +74,8 @@
       dpi: 300,
       paid: false,
       sessionId: "",
-      locked: false,
-      frozen: null,
+      verifying: false,
+      locked: false, // 🔒 se activa tras la primera descarga exitosa
     }
   };
 
@@ -1069,17 +1069,20 @@
     STEPS.forEach((s, idx) => {
       const b = document.createElement("button");
       b.type = "button";
-      b.className = "sheetTab" + (idx === state.step ? " active" : "");
+
+      const isLockedTab = !!state.export.locked && idx < 2;
+      b.className = "sheetTab" + (idx === state.step ? " active" : "") + (isLockedTab ? " disabled" : "");
       b.textContent = `${idx + 1}) ${s.label}`;
-      const isLocked = !!state.export.locked;
-      const isDisabled = isLocked && idx !== 2;
-      b.disabled = isDisabled;
-      if (isDisabled){ b.style.opacity = "0.45"; b.style.cursor = "not-allowed"; }
-      b.onclick = () => {
-        if (isDisabled) return;
-        state.step = idx;
-        renderAll();
-      };
+
+      if (isLockedTab){
+        b.disabled = true;
+        b.setAttribute("aria-disabled", "true");
+        b.onclick = null;
+      } else {
+        b.disabled = false;
+        b.onclick = () => { state.step = idx; renderAll(); };
+      }
+
       $tabs.appendChild(b);
     });
   }
@@ -1310,6 +1313,9 @@
       state.map.gridOpacity = clamp(state.map.gridOpacity ?? 0.60, 0.05, 0.60);
 
       if (isNeonThemeId(state.map.colorTheme)) state.map.backgroundMode = "match";
+
+    // 🔒 Si ya descargó una vez, forzar permanecer en "Descargar"
+    if (state.export.locked) state.step = 2;
 
       state.map.seed = (Math.random() * 1e9) | 0;
 
@@ -1839,103 +1845,6 @@
   // ===========================
   const CHECKOUT_DRAFT_KEY = "skymap_checkout_draft_v1";
 
-// ===========================
-// Bloqueo post-descarga (evita múltiples mapas con un solo pago)
-// ===========================
-const DOWNLOAD_LOCK_KEY_PREFIX = "skymap_download_lock_v1_";
-
-function getLockStorageKey(){
-  const sid = (state.export.sessionId || new URLSearchParams(window.location.search).get("session_id") || "").trim();
-  return sid ? (DOWNLOAD_LOCK_KEY_PREFIX + sid) : "";
-}
-
-function deepClone(obj){
-  return JSON.parse(JSON.stringify(obj));
-}
-
-function freezeDesignForDownloadOnce(){
-  if (state.export.locked) return;
-
-  const frozen = {
-    map: deepClone(state.map),
-    text: deepClone(state.text),
-    visible: deepClone(state.visible),
-    export: {
-      sizeKey: state.export.sizeKey,
-      format: state.export.format,
-      dpi: state.export.dpi,
-      sessionId: state.export.sessionId
-    }
-  };
-
-  state.export.locked = true;
-  state.export.frozen = frozen;
-
-  // Persistimos el bloqueo por session_id para que no se “reseteé” con refresh/back
-  try{
-    const key = getLockStorageKey();
-    if (key) localStorage.setItem(key, JSON.stringify({ ts: Date.now(), frozen }));
-  }catch(_e){}
-}
-
-function restoreLockIfAny(){
-  try{
-    const key = getLockStorageKey();
-    if (!key) return;
-    const raw = localStorage.getItem(key);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    if (!data?.frozen) return;
-
-    state.export.locked = true;
-    state.export.frozen = data.frozen;
-
-    // Forzamos el estado a lo congelado (UI/preview/export coherentes)
-    Object.assign(state.map, data.frozen.map || {});
-    Object.assign(state.text, data.frozen.text || {});
-    Object.assign(state.visible, data.frozen.visible || {});
-    if (data.frozen.export){
-      state.export.sizeKey = data.frozen.export.sizeKey || state.export.sizeKey;
-      state.export.format = data.frozen.export.format || state.export.format;
-      state.export.dpi = data.frozen.export.dpi || state.export.dpi;
-      if (data.frozen.export.sessionId) state.export.sessionId = data.frozen.export.sessionId;
-    }
-
-    // En bloqueo, siempre mantener al usuario en Descargar
-    state.step = 2;
-  }catch(_e){}
-}
-
-function withFrozenState(fn){
-  if (!state.export.locked || !state.export.frozen) return fn();
-
-  const snap = {
-    map: deepClone(state.map),
-    text: deepClone(state.text),
-    visible: deepClone(state.visible),
-    export: { sizeKey: state.export.sizeKey, format: state.export.format, dpi: state.export.dpi }
-  };
-
-  try{
-    Object.assign(state.map, state.export.frozen.map || {});
-    Object.assign(state.text, state.export.frozen.text || {});
-    Object.assign(state.visible, state.export.frozen.visible || {});
-    if (state.export.frozen.export){
-      state.export.sizeKey = state.export.frozen.export.sizeKey || state.export.sizeKey;
-      state.export.format = state.export.frozen.export.format || state.export.format;
-      state.export.dpi = state.export.frozen.export.dpi || state.export.dpi;
-    }
-    return fn();
-  } finally {
-    Object.assign(state.map, snap.map || {});
-    Object.assign(state.text, snap.text || {});
-    Object.assign(state.visible, snap.visible || {});
-    state.export.sizeKey = snap.export.sizeKey;
-    state.export.format = snap.export.format;
-    state.export.dpi = snap.export.dpi;
-  }
-}
-
   function persistCheckoutDraft(){
     try{
       const payload = {
@@ -1974,7 +1883,94 @@ function withFrozenState(fn){
     }catch(_e){}
   }
 
-  async function ensurePaidFromUrl(){
+  
+
+  // ===========================
+  // 🔒 Bloqueo después de la primera descarga (por session_id)
+  // - Evita que, tras pagar, el usuario cambie Diseño/Contenido y descargue infinitas variaciones.
+  // - Se guarda por session_id en localStorage.
+  // ===========================
+  const DOWNLOAD_LOCK_KEY = "skymap_download_lock_v1";
+
+  function getSessionIdFromUrl(){
+    try{
+      return (new URLSearchParams(window.location.search).get("session_id") || "").trim();
+    }catch(_e){
+      return "";
+    }
+  }
+
+  function snapshotForLock(){
+    return {
+      map: JSON.parse(JSON.stringify(state.map)),
+      text: JSON.parse(JSON.stringify(state.text)),
+      visible: JSON.parse(JSON.stringify(state.visible)),
+      export: {
+        sizeKey: state.export.sizeKey,
+        format: state.export.format,
+        dpi: state.export.dpi
+      }
+    };
+  }
+
+  function applySnapshot(snapshot){
+    if (!snapshot) return;
+    try{
+      if (snapshot.map) Object.assign(state.map, snapshot.map);
+      if (snapshot.text) Object.assign(state.text, snapshot.text);
+      if (snapshot.visible) Object.assign(state.visible, snapshot.visible);
+      if (snapshot.export){
+        state.export.sizeKey = snapshot.export.sizeKey || state.export.sizeKey;
+        state.export.format = snapshot.export.format || state.export.format;
+        state.export.dpi = snapshot.export.dpi || state.export.dpi;
+      }
+    }catch(_e){}
+  }
+
+  function persistDownloadLock(){
+    try{
+      const sid = (state.export.sessionId || getSessionIdFromUrl() || "").trim();
+      if (!sid) return;
+      const payload = {
+        ts: Date.now(),
+        sessionId: sid,
+        locked: true,
+        snapshot: snapshotForLock()
+      };
+      localStorage.setItem(DOWNLOAD_LOCK_KEY, JSON.stringify(payload));
+    }catch(_e){}
+  }
+
+  function restoreDownloadLockIfAny(){
+    try{
+      const sid = (state.export.sessionId || getSessionIdFromUrl() || "").trim();
+      if (!sid) return;
+
+      const raw = localStorage.getItem(DOWNLOAD_LOCK_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+
+      if (!data?.locked) return;
+      if (String(data.sessionId || "") !== sid) return;
+
+      // opcional: expira a las 24h
+      const ts = Number(data.ts || 0);
+      if (ts && (Date.now() - ts) > 24 * 60 * 60 * 1000) return;
+
+      state.export.locked = true;
+      applySnapshot(data.snapshot);
+
+      // Forzar UI al paso de Descargar
+      state.step = 2;
+    }catch(_e){}
+  }
+
+  function lockAfterFirstDownload(){
+    if (state.export.locked) return;
+    state.export.locked = true;
+    persistDownloadLock();
+  }
+async function ensurePaidFromUrl(){
     const qp = new URLSearchParams(window.location.search);
     const sessionId = qp.get("session_id");
     if (!sessionId){
@@ -2214,15 +2210,17 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
       const quality = format === "jpg" ? 0.95 : undefined;
       const url = out.toDataURL(mime, quality);
       downloadDataURL(url, `poster_${sizeKey}.${format}`);
-      return;
+      return true;
     }
 
     // ✅ PDF REAL (sin print) — descarga directa
     try {
       await downloadPDFfromCanvas(out, W, H, dpi || 300, `poster_${sizeKey}.pdf`);
+      return true;
     } catch (err) {
       console.error(err);
       alert("No se pudo generar el PDF. Revisa bloqueadores o intenta otro navegador.");
+      return false;
     }
   }
 
@@ -2284,7 +2282,10 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
   </div>
 `;const input = opt.querySelector("input");
       input.disabled = !!state.export.locked;
-      if (state.export.locked){ opt.style.opacity = "0.65"; opt.style.cursor = "not-allowed"; }
+      if (state.export.locked){
+        opt.style.opacity = "0.65";
+        opt.style.cursor = "not-allowed";
+      }
       input.onchange = () => {
         if (state.export.locked) return;
         state.export.sizeKey = input.value;
@@ -2313,7 +2314,13 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
       formatSel.appendChild(opt);
     });
     formatSel.value = state.export.format;
+    formatSel.disabled = !!state.export.locked;
+    if (state.export.locked){
+      formatSel.style.opacity = "0.6";
+      formatSel.style.cursor = "not-allowed";
+    }
     formatSel.onchange = () => {
+      if (state.export.locked) return;
       state.export.format = formatSel.value;
     };
     formatRow.appendChild(formatSel);
@@ -2327,16 +2334,24 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     prevBtn.className = "btn ghost";
     prevBtn.textContent = "Anterior";
     prevBtn.disabled = !!state.export.locked;
-    if (state.export.locked){ prevBtn.style.opacity = "0.5"; prevBtn.style.cursor = "not-allowed"; }
-    prevBtn.onclick = () => { state.step = 1; renderAll(); };
+    if (state.export.locked){
+      prevBtn.style.opacity = "0.45";
+      prevBtn.style.cursor = "not-allowed";
+    }
+    prevBtn.onclick = () => {
+      if (state.export.locked) return;
+      state.step = 1;
+      renderAll();
+    };
 
     const buyBtn = document.createElement("button");
     buyBtn.type = "button";
     buyBtn.className = "btn primary";
-    buyBtn.textContent = state.export.paid ? "Pago confirmado ✓" : (state.export.verifying ? "Verificando pago…" : "Comprar");
-    buyBtn.disabled = !!state.export.paid || !!state.export.verifying;
+    buyBtn.textContent = state.export.paid ? "Pago confirmado ✓" : (state.export.verifying ? "Verificando pago…" : (state.export.locked ? "Compra usada ✓" : "Comprar"));
+    buyBtn.disabled = !!state.export.paid || !!state.export.verifying || !!state.export.locked;
 
     buyBtn.onclick = async () => {
+      if (state.export.locked) return;
       try{
         buyBtn.disabled = true;
         buyBtn.textContent = "Abriendo Stripe…";
@@ -2391,14 +2406,17 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
         renderAll();
       }
 
-      // ✅ En la primera descarga, congela el diseño y bloquea navegación/inputs
-      freezeDesignForDownloadOnce();
-      renderAll();
-
+      let ok = false;
       if (state.export.format === "png"){
-        await withFrozenState(() => exportPoster("png", state.export.sizeKey));
+        ok = await exportPoster("png", state.export.sizeKey);
       } else {
-        await withFrozenState(() => exportPoster("pdf", state.export.sizeKey));
+        ok = await exportPoster("pdf", state.export.sizeKey);
+      }
+
+      // 🔒 Una vez descargado con éxito (primera vez), bloquear Diseño/Contenido y Tamaño.
+      if (ok) {
+        lockAfterFirstDownload();
+        renderAll();
       }
     };
 
@@ -2415,7 +2433,6 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
   }
 
   function renderSection(){
-    if (state.export.locked) state.step = 2;
     if (state.step === 0) return renderSectionDesign();
     if (state.step === 1) return renderSectionContent();
     return renderSectionExport();
@@ -2441,7 +2458,7 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
   // Init
   restoreCheckoutDraftIfAny();
   initPaidStateFromUrl();
-  restoreLockIfAny();
+  restoreDownloadLockIfAny();
   updateSeedFromDateTime();
   ensurePosterLayers();
   ensurePreviewWatermarkLayer();
