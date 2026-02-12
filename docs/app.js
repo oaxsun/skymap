@@ -1826,7 +1826,19 @@ verifying: false,
     document.body.appendChild(a);
     a.click();
     a.remove();
-  }
+  
+    
+// ✅ En cuanto se dispara la descarga, regresamos el botón a normal
+try{
+  state.export.downloading = false;
+  renderAll();
+}catch(_e){}
+// ✅ En cuanto se dispara la descarga, regresamos el botón a normal
+    try{
+      state.export.downloading = false;
+      renderAll();
+    }catch(_e){}
+}
 
   // ===========================
   // ✅ PDF REAL con jsPDF (descarga directa, sin print)
@@ -2419,7 +2431,7 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     downloadBtn.type = "button";
     downloadBtn.className = "btn primary";
     downloadBtn.style.width = "100%";
-    downloadBtn.innerHTML = state.export.downloading ? `<span class="btnSpinner" aria-hidden="true"></span><span>Generando…</span>` : "Descargar";
+    downloadBtn.innerHTML = state.export.downloading ? `<span class="btnSpinner" aria-hidden="true"></span><span>Descargando…</span>` : "Descargar";
     downloadBtn.disabled = (!state.export.paid) || !!state.export.downloading;
 
     if (!state.export.paid){
