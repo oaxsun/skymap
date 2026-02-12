@@ -74,6 +74,8 @@
       dpi: 300,
       paid: false,
       sessionId: "",
+      locked: false,
+      frozen: null,
     }
   };
 
@@ -1069,7 +1071,15 @@
       b.type = "button";
       b.className = "sheetTab" + (idx === state.step ? " active" : "");
       b.textContent = `${idx + 1}) ${s.label}`;
-      b.onclick = () => { state.step = idx; renderAll(); };
+      const isLocked = !!state.export.locked;
+      const isDisabled = isLocked && idx !== 2;
+      b.disabled = isDisabled;
+      if (isDisabled){ b.style.opacity = "0.45"; b.style.cursor = "not-allowed"; }
+      b.onclick = () => {
+        if (isDisabled) return;
+        state.step = idx;
+        renderAll();
+      };
       $tabs.appendChild(b);
     });
   }
@@ -1829,6 +1839,103 @@
   // ===========================
   const CHECKOUT_DRAFT_KEY = "skymap_checkout_draft_v1";
 
+// ===========================
+// Bloqueo post-descarga (evita múltiples mapas con un solo pago)
+// ===========================
+const DOWNLOAD_LOCK_KEY_PREFIX = "skymap_download_lock_v1_";
+
+function getLockStorageKey(){
+  const sid = (state.export.sessionId || new URLSearchParams(window.location.search).get("session_id") || "").trim();
+  return sid ? (DOWNLOAD_LOCK_KEY_PREFIX + sid) : "";
+}
+
+function deepClone(obj){
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function freezeDesignForDownloadOnce(){
+  if (state.export.locked) return;
+
+  const frozen = {
+    map: deepClone(state.map),
+    text: deepClone(state.text),
+    visible: deepClone(state.visible),
+    export: {
+      sizeKey: state.export.sizeKey,
+      format: state.export.format,
+      dpi: state.export.dpi,
+      sessionId: state.export.sessionId
+    }
+  };
+
+  state.export.locked = true;
+  state.export.frozen = frozen;
+
+  // Persistimos el bloqueo por session_id para que no se “reseteé” con refresh/back
+  try{
+    const key = getLockStorageKey();
+    if (key) localStorage.setItem(key, JSON.stringify({ ts: Date.now(), frozen }));
+  }catch(_e){}
+}
+
+function restoreLockIfAny(){
+  try{
+    const key = getLockStorageKey();
+    if (!key) return;
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data?.frozen) return;
+
+    state.export.locked = true;
+    state.export.frozen = data.frozen;
+
+    // Forzamos el estado a lo congelado (UI/preview/export coherentes)
+    Object.assign(state.map, data.frozen.map || {});
+    Object.assign(state.text, data.frozen.text || {});
+    Object.assign(state.visible, data.frozen.visible || {});
+    if (data.frozen.export){
+      state.export.sizeKey = data.frozen.export.sizeKey || state.export.sizeKey;
+      state.export.format = data.frozen.export.format || state.export.format;
+      state.export.dpi = data.frozen.export.dpi || state.export.dpi;
+      if (data.frozen.export.sessionId) state.export.sessionId = data.frozen.export.sessionId;
+    }
+
+    // En bloqueo, siempre mantener al usuario en Descargar
+    state.step = 2;
+  }catch(_e){}
+}
+
+function withFrozenState(fn){
+  if (!state.export.locked || !state.export.frozen) return fn();
+
+  const snap = {
+    map: deepClone(state.map),
+    text: deepClone(state.text),
+    visible: deepClone(state.visible),
+    export: { sizeKey: state.export.sizeKey, format: state.export.format, dpi: state.export.dpi }
+  };
+
+  try{
+    Object.assign(state.map, state.export.frozen.map || {});
+    Object.assign(state.text, state.export.frozen.text || {});
+    Object.assign(state.visible, state.export.frozen.visible || {});
+    if (state.export.frozen.export){
+      state.export.sizeKey = state.export.frozen.export.sizeKey || state.export.sizeKey;
+      state.export.format = state.export.frozen.export.format || state.export.format;
+      state.export.dpi = state.export.frozen.export.dpi || state.export.dpi;
+    }
+    return fn();
+  } finally {
+    Object.assign(state.map, snap.map || {});
+    Object.assign(state.text, snap.text || {});
+    Object.assign(state.visible, snap.visible || {});
+    state.export.sizeKey = snap.export.sizeKey;
+    state.export.format = snap.export.format;
+    state.export.dpi = snap.export.dpi;
+  }
+}
+
   function persistCheckoutDraft(){
     try{
       const payload = {
@@ -2176,7 +2283,10 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
 
   </div>
 `;const input = opt.querySelector("input");
+      input.disabled = !!state.export.locked;
+      if (state.export.locked){ opt.style.opacity = "0.65"; opt.style.cursor = "not-allowed"; }
       input.onchange = () => {
+        if (state.export.locked) return;
         state.export.sizeKey = input.value;
         renderAll();
       };
@@ -2216,6 +2326,8 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     prevBtn.type = "button";
     prevBtn.className = "btn ghost";
     prevBtn.textContent = "Anterior";
+    prevBtn.disabled = !!state.export.locked;
+    if (state.export.locked){ prevBtn.style.opacity = \"0.5\"; prevBtn.style.cursor = \"not-allowed\"; }
     prevBtn.onclick = () => { state.step = 1; renderAll(); };
 
     const buyBtn = document.createElement("button");
@@ -2280,9 +2392,12 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
       }
 
       if (state.export.format === "png"){
-        await exportPoster("png", state.export.sizeKey);
+        freezeDesignForDownloadOnce();
+        renderAll();
+
+        withFrozenState(() => await exportPoster("png", state.export.sizeKey););
       } else {
-        await exportPoster("pdf", state.export.sizeKey);
+        withFrozenState(() => await exportPoster("pdf", state.export.sizeKey););
       }
     };
 
@@ -2299,6 +2414,7 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
   }
 
   function renderSection(){
+    if (state.export.locked) state.step = 2;
     if (state.step === 0) return renderSectionDesign();
     if (state.step === 1) return renderSectionContent();
     return renderSectionExport();
@@ -2324,6 +2440,7 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
   // Init
   restoreCheckoutDraftIfAny();
   initPaidStateFromUrl();
+  restoreLockIfAny();
   updateSeedFromDateTime();
   ensurePosterLayers();
   ensurePreviewWatermarkLayer();
