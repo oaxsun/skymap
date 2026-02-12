@@ -2327,7 +2327,7 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     prevBtn.className = "btn ghost";
     prevBtn.textContent = "Anterior";
     prevBtn.disabled = !!state.export.locked;
-    if (state.export.locked){ prevBtn.style.opacity = \"0.5\"; prevBtn.style.cursor = \"not-allowed\"; }
+    if (state.export.locked){ prevBtn.style.opacity = "0.5"; prevBtn.style.cursor = "not-allowed"; }
     prevBtn.onclick = () => { state.step = 1; renderAll(); };
 
     const buyBtn = document.createElement("button");
@@ -2391,13 +2391,14 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
         renderAll();
       }
 
-      if (state.export.format === "png"){
-        freezeDesignForDownloadOnce();
-        renderAll();
+      // ✅ En la primera descarga, congela el diseño y bloquea navegación/inputs
+      freezeDesignForDownloadOnce();
+      renderAll();
 
-        withFrozenState(() => await exportPoster("png", state.export.sizeKey););
+      if (state.export.format === "png"){
+        await withFrozenState(() => exportPoster("png", state.export.sizeKey));
       } else {
-        withFrozenState(() => await exportPoster("pdf", state.export.sizeKey););
+        await withFrozenState(() => exportPoster("pdf", state.export.sizeKey));
       }
     };
 
