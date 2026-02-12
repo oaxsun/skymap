@@ -988,6 +988,25 @@
   flex: 1 1 auto !important;
 }
 
+/* ===== CROSS PLATFORM ORDER FIX (Mac / Windows / Chrome) ===== */
+
+.sizeOpt,
+.sizeOpt__content{
+  direction: ltr !important;
+}
+
+.sizeOpt__content{
+  flex-wrap: nowrap !important;
+}
+
+.sizeOpt__topLine{
+  order: 0 !important;
+}
+
+.sizeOpt__priceStack{
+  order: 1 !important;
+}
+
 </style>
 </head>
 <body>
