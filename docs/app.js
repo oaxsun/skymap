@@ -1941,28 +1941,9 @@
     const pdfBlob = await r.blob();
     const url = URL.createObjectURL(pdfBlob);
 
-    // ✅ descarga directa (sin ventana emergente)
-    const cd = r.headers.get("Content-Disposition") || "";
-    let filenameOut = filename || "skymap.pdf";
-
-    const mStar = cd.match(/filename\*=UTF-8''([^;]+)/i);
-    const mQuoted = cd.match(/filename="([^"]+)"/i);
-    const mPlain = cd.match(/filename=([^;]+)/i);
-
-    if (mStar && mStar[1]) filenameOut = decodeURIComponent(mStar[1].trim());
-    else if (mQuoted && mQuoted[1]) filenameOut = mQuoted[1].trim();
-    else if (mPlain && mPlain[1]) filenameOut = mPlain[1].trim().replace(/^"|"$/g, "");
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filenameOut;
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
+    window.open(url, "_blank", "noopener,noreferrer");
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
-}
+  }
 
   async function exportPoster(format, sizeKey){
     const sz = EXPORT_SIZES.find(x => x.key === sizeKey) || EXPORT_SIZES[0];
@@ -2156,24 +2137,26 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
       const opt = document.createElement("label");
       opt.className = "sizeOpt" + (state.export.sizeKey === sz.key ? " isActive" : "");
       opt.innerHTML = `
-        <input class="sizeOpt__input" type="radio" name="exportSize" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""}/>
+  <input class="sizeOpt__input" type="radio" name="exportSize" value="${sz.key}" ${state.export.sizeKey === sz.key ? "checked" : ""}/>
 
-        <div class="sizeOpt__left">
-          <div class="sizeOpt__dot" aria-hidden="true"></div>
-        </div>
+  <div class="sizeOpt__left">
+    <div class="sizeOpt__dot" aria-hidden="true"></div>
+  </div>
 
-        <div class="sizeOpt__content">
-          <div class="sizeOpt__priceLine">
-            <span class="sizeOpt__priceValue">${formatMoneyMXN(sz.price ?? "")}</span>
-          </div>
+  <div class="sizeOpt__content">
 
-          <div class="sizeOpt__metaLine">
-            <span class="sizeOpt__old">${formatMoneyMXN(sz.oldPrice ?? "")}</span>
-            <span class="sizeOpt__subLine"><span class="sizeOpt__keyInline">${sz.title || sz.key}</span>${sz.sub}</span>
-          </div>
-        </div>
-      `;
-const input = opt.querySelector("input");
+    <div class="sizeOpt__topLine">
+      <div class="sizeOpt__key">${sz.title || sz.key}</div>
+      <div class="sizeOpt__dims">${sz.sub}</div>
+    </div>
+
+    <div class="sizeOpt__priceStack">
+      <div class="sizeOpt__old">${formatMoneyMXN(sz.oldPrice ?? "")}</div>
+      <div class="sizeOpt__price">${formatMoneyMXN(sz.price ?? "")}</div>
+    </div>
+
+  </div>
+`;const input = opt.querySelector("input");
       input.onchange = () => {
         state.export.sizeKey = input.value;
         renderAll();
