@@ -74,7 +74,9 @@
       dpi: 300,
       paid: false,
       sessionId: "",
-      verifying: false,
+      
+      downloading: false,
+verifying: false,
       locked: false, // 🔒 se activa tras la primera descarga exitosa
     }
   };
@@ -365,6 +367,7 @@
 
   function applyPreviewWatermark(tokens){
     ensurePreviewWatermarkLayer();
+  ensureSpinnerStyles();
     if (!$watermark) return;
 
     const isNeon = isNeonThemeId(state.map.colorTheme);
@@ -1840,6 +1843,31 @@
     return (window.__API_BASE__ || "").trim() || "http://localhost:3001";
   }
 
+
+
+// Spinner styles for download button (injected once)
+function ensureSpinnerStyles(){
+  if (document.getElementById("btnSpinnerStyles")) return;
+  const st = document.createElement("style");
+  st.id = "btnSpinnerStyles";
+  st.textContent = `
+    .btnSpinner{
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: rgba(255,255,255,0.95);
+      display: inline-block;
+      animation: btnSpin .8s linear infinite;
+      vertical-align: -3px;
+      margin-right: 10px;
+    }
+    @keyframes btnSpin{ to { transform: rotate(360deg); } }
+    .btn.primary span{ display: inline-flex; align-items: center; }
+  `;
+  document.head.appendChild(st);
+}
+
   // ===========================
   // Pago (Stripe Checkout) + persistencia de diseño
   // ===========================
@@ -2391,8 +2419,8 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     downloadBtn.type = "button";
     downloadBtn.className = "btn primary";
     downloadBtn.style.width = "100%";
-    downloadBtn.textContent = "Descargar";
-    downloadBtn.disabled = !state.export.paid;
+    downloadBtn.innerHTML = state.export.downloading ? `<span class="btnSpinner" aria-hidden="true"></span><span>Generando…</span>` : "Descargar";
+    downloadBtn.disabled = (!state.export.paid) || !!state.export.downloading;
 
     if (!state.export.paid){
       downloadBtn.style.opacity = "0.5";
@@ -2400,6 +2428,10 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
     }
 
     downloadBtn.onclick = async () => {
+if (state.export.downloading) return;
+state.export.downloading = true;
+renderAll();
+
       if (!state.export.paid){
         const ok = await ensurePaidFromUrl();
         if (!ok) return;
@@ -2462,6 +2494,7 @@ const yDT       = Math.round(relTop(pDTEl)    * sy);const title = String(state.t
   updateSeedFromDateTime();
   ensurePosterLayers();
   ensurePreviewWatermarkLayer();
+  ensureSpinnerStyles();
   loadPrefsForStyle(state.map.styleId);
 
   applyPosterLayoutByStyle();
