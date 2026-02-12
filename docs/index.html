@@ -179,17 +179,17 @@
 <article class="steps__card">
 <div class="steps__step">Paso 1</div>
 <p class="steps__text">¡Selecciona el diseño que mas te gusta, combina colores y agrega opciones que lo hagan unico!</p>
-<img alt="Paso 1" class="steps__img" src="./media/s1.jpg"/>
+
 </article>
 <article class="steps__card">
 <div class="steps__step">Paso 2</div>
 <p class="steps__text">Escribe ese mensaje especial que acompañara tu mapa estelar, agrega el día especial y el lugar donde sucedió.</p>
-<img alt="Paso 2" class="steps__img" src="./media/s2.jpg"/>
+
 </article>
 <article class="steps__card">
 <div class="steps__step">Paso 3</div>
 <p class="steps__text">Exportalo a las medidas y formato que mas te guste y envíaselo a esa persona especial.</p>
-<img alt="Paso 3" class="steps__img" src="./media/s3.jpg"/>
+
 </article>
 </div>
 <div class="steps__cta">
@@ -265,7 +265,6 @@
 <a data-i18n="nav_faq" href="#faq">FAQs</a>
 </nav>
 <div class="nav-actions">
-
 <button aria-controls="mobileMenu" aria-expanded="false" aria-label="Open menu" class="hamburger" id="hamburgerBtn">
 <span></span><span></span><span></span>
 </button>
@@ -285,6 +284,356 @@
 </header></div>
 
 
+<!-- =========================
+       HERO
+       ========================= -->
+<!-- =========================
+       WHY
+       ========================= -->
+<!-- =========================
+       STYLES (formerly Designs)
+       ========================= -->
+<script>
+    // --------- Mobile menu ----------
+    const btn = document.getElementById("hamburgerBtn");
+    const backdrop = document.getElementById("mobileBackdrop");
+    const links = document.querySelectorAll(".mobile-link");
+
+    function openMenu(){
+      document.body.classList.add("menu-open");
+      btn.classList.add("is-open");
+      btn.setAttribute("aria-expanded", "true");
+    }
+    function closeMenu(){
+      document.body.classList.remove("menu-open");
+      btn.classList.remove("is-open");
+      btn.setAttribute("aria-expanded", "false");
+    }
+    btn.addEventListener("click", () => {
+      if (document.body.classList.contains("menu-open")) closeMenu();
+      else openMenu();
+    });
+    backdrop.addEventListener("click", closeMenu);
+    links.forEach(a => a.addEventListener("click", closeMenu));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+
+    // --------- Video loop smoothing (micro fade) ----------
+    const v = document.querySelector(".bg-video");
+    const fade = document.querySelector(".bg-fade");
+    if (v && fade) {
+      v.addEventListener("timeupdate", () => {
+        if (v.duration && (v.duration - v.currentTime) < 0.18) {
+          fade.classList.add("is-on");
+          setTimeout(() => fade.classList.remove("is-on"), 220);
+        }
+      });
+    }
+
+    // --------- i18n (ES/EN by browser language) ----------
+    const i18n = {
+      es: {
+        // head
+        title: "STELLR Skymap generator | Mapas estelares más baratos garantizado por un dólar",
+        desc: "Crea tu mapa estelar personalizado con STELLR Skymap generator. El cielo exacto de un momento especial. Mapas estelares más baratos garantizado por un dólar. Regalo único y especial.",
+        keys: "mapas estelares mas baratos garantizado, por un dolar, regalo unico y especial, mapa estelar personalizado",
+
+        // promo
+        promo: "¡PROMO DE SAN VALENTÍN: TU POSTER STELLR Skymap generator POR <span class='promo-strong'>SOLO $20 MXN HASTA EL 14 DE FEBRERO</span>!",
+
+        // nav
+        nav_home: "Home",
+        nav_why: "¿Por qué nosotros?",
+        nav_design: "Diseño",
+        nav_hiw: "¿Cómo funciona?",
+        nav_reminder: "Recordatorio",
+        nav_opinions: "Opiniones",
+        nav_faq: "FAQs",
+
+        // hero
+        hero_h1: "EL CIELO EXACTO",
+        hero_h2: "DE UN MOMENTO QUE CAMBIO TU VIDA",
+        hero_p: "Genera un mapa estelar del cielo tal como se veía en una fecha y lugar especiales. Un recuerdo elegante, personalizado y listo para imprimir.",
+        btn_create: "¡CREAR AHORA!",
+
+        // styles
+        styles_title: "Elige un increíble estilo",
+        styles_subtitle: "Selecciona el estilo de mapa estelar que más te guste y personalízalo. ¡Cada mapa estelar es diferente!",
+        styles_cta: "VER MÁS OPCIONES",
+        style_classic: "Clásico",
+        style_modern: "Moderno",
+        style_poster: "Póster",
+        style_romantic: "Romántico",
+
+        // why
+        why_title: "¿Por qué STELLR Skymap generator es la mejor opción?",
+        why_price: "¡Crea tu mapa estelar personalizado ahora por <strong>sólo $20.00 mxn</strong>!",
+
+        b1_title: "Fácil y rapido de crear",
+        b1_desc: "Diseña tu mapa estelar en menos de 5 minutos desde tu celular o computadora y descarga al instante.",
+        b2_title: "No son puntos y líneas al azar",
+        b2_desc: "Cada mapa estelar es astronómicamente preciso y verificable en planetarios en línea.",
+        b3_title: "Cada mapa es único",
+        b3_desc: "Cada mapa estelar es personalizado por ti, pensado para una persona especial y un momento que merece ser recordado.",
+        b4_title: "La mejor relación precio–calidad",
+        b4_desc: "Ofrecemos los mapas estelares más baratos garantizado, sin cargos ocultos ni sorpresas al finalizar tu compra.",
+        b5_title: "Un regalo ecologico y sustentable",
+        b5_desc: "Al ser un producto digital, evitas empaques plásticos y reduces el impacto ambiental sin costos adicionales.",
+        b6_title: "Un regalo único y especial",
+        b6_desc: "Ideal para aniversarios, cumpleaños, bodas o momentos irrepetibles. Un detalle emocional que nadie olvida."
+      },
+      en: {
+        // head
+        title: "STELLR Skymap generator | Guaranteed cheapest star maps for one dollar",
+        desc: "Create your personalized star map with STELLR Skymap generator. The exact sky from a special moment. Guaranteed cheapest star maps for one dollar. A unique and special gift.",
+        keys: "guaranteed cheapest star maps, one dollar, unique and special gift, personalized star map",
+
+        // promo
+        promo: "VALENTINE'S PROMO: YOUR STELLR Skymap generator POSTER FOR <span class='promo-strong'>JUST $20 MXN UNTIL FEBRUARY 14TH</span>!",
+
+        // nav
+        nav_home: "Home",
+        nav_why: "Why us?",
+        nav_design: "Design",
+        nav_hiw: "How it works",
+        nav_reminder: "Reminder",
+        nav_opinions: "Reviews",
+        nav_faq: "FAQs",
+
+        // hero
+        hero_h1: "THE EXACT SKY",
+        hero_h2: "FROM A MOMENT THAT CHANGED YOUR LIFE",
+        hero_p: "Generate a star map of the sky exactly as it looked on a special date and place. An elegant memory, personalized and ready to print.",
+        btn_create: "CREATE NOW!",
+
+        // styles
+        styles_title: "Choose an amazing style",
+        styles_subtitle: "Pick the star map style you like most and personalize it. Every star map is different!",
+        styles_cta: "SEE MORE OPTIONS",
+        style_classic: "Classic",
+        style_modern: "Modern",
+        style_poster: "Poster",
+        style_romantic: "Romantic",
+
+        // why
+        why_title: "Why STELLR Skymap generator is the best choice",
+        why_price: "Create your personalized star map now for <strong>only $20.00 mxn</strong>!",
+
+        b1_title: "Fast & easy to create",
+        b1_desc: "Design your star map in under 5 minutes from your phone or computer and download instantly.",
+        b2_title: "Not random dots & lines",
+        b2_desc: "Each star map is astronomically accurate and verifiable in online planetariums.",
+        b3_title: "Every map is unique",
+        b3_desc: "Each star map is made by you, personalized for someone special and a moment worth remembering.",
+        b4_title: "Best price–quality",
+        b4_desc: "Guaranteed cheapest star maps, with no hidden fees or checkout surprises.",
+        b5_title: "Eco-friendly digital gift",
+        b5_desc: "As a digital product, you avoid plastic packaging and reduce environmental impact.",
+        b6_title: "A unique special gift",
+        b6_desc: "Perfect for anniversaries, birthdays, weddings, or unforgettable moments. A detail no one forgets."
+      }
+    };
+
+    function applyLang(lang){
+      const dict = i18n[lang] || i18n.es;
+
+      // update <html lang>
+      document.documentElement.lang = (lang === "en") ? "en" : "es-MX";
+
+      // update head
+      document.title = dict.title;
+      const md = document.getElementById("metaDesc");
+      const mk = document.getElementById("metaKeys");
+      if (md) md.setAttribute("content", dict.desc);
+      if (mk) mk.setAttribute("content", dict.keys);
+
+      // update all nodes with data-i18n
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (!key || dict[key] == null) return;
+
+        // promo + strings with <span> need innerHTML
+        if (key === "promo" || key === "why_price") el.innerHTML = dict[key];
+        else el.textContent = dict[key];
+      });
+    }
+
+    // Detect browser language
+    const browserLang = (navigator.language || "es").toLowerCase();
+    const lang = browserLang.startsWith("en") ? "en" : "es";
+    applyLang(lang);
+  </script>
+<!-- =====================================================
+     REMINDER
+     ===================================================== -->
+<!-- ===================== REMINDER FIN ================= -->
+<script>
+(function(){
+  const toggle = document.getElementById('reminderToggle');
+  const form = document.getElementById('reminderForm');
+  const msg = document.getElementById('reminderMsg');
+
+  if(!toggle || !form) return;
+
+  toggle.addEventListener('click', () => {
+    form.classList.toggle('is-open');
+    if(form.classList.contains('is-open')){
+      const email = document.getElementById('reminderEmail');
+      if(email) email.focus();
+    }
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    msg.textContent = "";
+    msg.classList.remove('is-ok','is-err');
+
+    const email = document.getElementById('reminderEmail').value.trim();
+    const name  = document.getElementById('reminderName').value.trim();
+    const date  = document.getElementById('reminderDate').value;
+
+    if(!email || !name || !date){
+      msg.textContent = "Por favor completa todos los campos.";
+      msg.classList.add('is-err');
+      return;
+    }
+
+    // Lógica lista para backend (Render): por ahora NO se envía, solo se prepara payload
+    const payload = { email, name, date, createdAt: new Date().toISOString() };
+
+    // Guardamos localmente para que ya exista “lógica” sin backend
+    try{
+      localStorage.setItem('skymap_reminder', JSON.stringify(payload));
+    }catch(_){}
+
+    // Cuando tengas backend, aquí va el POST:
+    // fetch('/api/reminders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+
+    msg.textContent = "¡Listo! Tu recordatorio quedó registrado. Te avisaremos por correo cuando llegue la fecha.";
+    msg.classList.add('is-ok');
+    form.reset();
+    form.classList.remove('is-open');
+  });
+})();
+</script>
+<script>
+/* OPINIONS carousel */
+(function(){
+  const track = document.getElementById('opinionsTrack');
+  if(!track) return;
+
+  const opinions = [
+    { title: "Un regalo que emociona", text: "Lo compré para aniversario y fue el detalle más bonito. Se ve elegante y el proceso fue rapidísimo.", email: "s*****@***.com" },
+    { title: "Súper fácil de personalizar", text: "En menos de 5 minutos ya tenía mi mapa listo para imprimir. Quedó increíble enmarcado.", email: "l*****@***.com" },
+    { title: "Se ve premium", text: "No esperaba tanta calidad por el precio. La tipografía y el diseño se ven muy pro.", email: "m*****@***.com" },
+    { title: "Exactamente lo que buscaba", text: "Puse la fecha y ciudad correctas y quedó perfecto. A todos les encantó el resultado.", email: "a*****@***.com" },
+    { title: "Detalle original", text: "Me preguntaron dónde lo hice porque se ve diferente a cualquier regalo típico. 10/10.", email: "p*****@***.com" },
+    { title: "Entrega inmediata", text: "Compré, personalicé y descargué al instante. Ideal cuando necesitas un regalo rápido.", email: "d*****@***.com" },
+    { title: "Diseño moderno", text: "Elegí un estilo minimalista y luce precioso en la pared. Muy recomendable.", email: "f*****@***.com" },
+    { title: "Muy buena experiencia", text: "Todo fue intuitivo desde el celular. El archivo salió con excelente resolución.", email: "j*****@***.com" },
+    { title: "Perfecto para imprimir", text: "Lo imprimí en tamaño grande y se ve nítido. Vale totalmente la pena.", email: "v*****@***.com" },
+    { title: "Regalo inolvidable", text: "Lo regalé en boda civil y fue el detalle favorito de la noche. Súper emotivo.", email: "c*****@***.com" }
+  ];
+
+  track.innerHTML = opinions.map(o => `
+    <article class="opinions__card">
+      <div class="opinions__stars">★★★★★</div>
+      <h3 class="opinions__cardTitle">${o.title}</h3>
+      <p class="opinions__cardText">${o.text}</p>
+      <p class="opinions__cardEmail">${o.email}</p>
+    </article>
+  `).join('');
+
+  // Carousel: auto-scroll in a loop, 3 cards desktop / 2 tablet / 1 mobile
+  let index = 0;
+  let timer = null;
+
+  function getPerView(){
+    const w = window.innerWidth;
+    if (w <= 640) return 1;
+    if (w <= 980) return 2;
+    return 3;
+  }
+
+  function step(){
+    const perView = getPerView();
+    const cards = track.querySelectorAll('.opinions__card');
+    if(!cards.length) return;
+
+    // card width includes gap; use first card rect + computed gap
+    const card = cards[0].getBoundingClientRect();
+    const gap = parseFloat(getComputedStyle(track).gap || "0");
+    const cardW = card.width + gap;
+
+    const maxIndex = Math.max(0, cards.length - perView);
+    index = (index >= maxIndex) ? 0 : (index + 1);
+
+    track.style.transform = `translateX(-${index * cardW}px)`;
+  }
+
+  function start(){
+    stop();
+    timer = setInterval(step, 3800);
+  }
+  function stop(){
+    if(timer) clearInterval(timer);
+    timer = null;
+  }
+
+  // reset on resize
+  window.addEventListener('resize', () => {
+    index = 0;
+    track.style.transform = 'translateX(0px)';
+  });
+
+  // pause on hover (desktop)
+  const viewport = track.parentElement;
+  if(viewport){
+    viewport.addEventListener('mouseenter', stop);
+    viewport.addEventListener('mouseleave', start);
+    viewport.addEventListener('touchstart', stop, {passive:true});
+    viewport.addEventListener('touchend', start, {passive:true});
+  }
+
+  start();
+})();
+</script>
+<!-- =========================
+     FOOTER
+     ========================= -->
+<!-- ===================== FOOTER FIN ================= -->
+<section class="faqs" id="faq">
+<div class="faqs__container">
+<h2 class="faqs__title">FAQs</h2>
+<p class="faqs__subtitle">
+      Nos sentimos orgullosos de poder brindar un producto de calidad que nuestros clientes aman.
+    </p>
+<div class="faqs__list">
+<details class="faq" open="">
+<summary>¿Qué es un mapa estelar?</summary>
+<p>Es una representación exacta del cielo en una fecha y lugar específicos, mostrando la posición real de las estrellas en ese momento.</p>
+</details>
+<details class="faq">
+<summary>¿El mapa es realmente del cielo de mi fecha y lugar?</summary>
+<p>Sí. El mapa se genera con datos astronómicos reales según la fecha, hora y ubicación que elijas.</p>
+</details>
+<details class="faq">
+<summary>¿Son precisos los mapas estelares?</summary>
+<p>Totalmente. Cada mapa es astronómicamente preciso y puede verificarse en planetarios digitales.</p>
+</details>
+<details class="faq">
+<summary>¿Puedo personalizar el texto y el estilo?</summary>
+<p>Sí. Puedes elegir diferentes estilos, colores y agregar un mensaje personalizado.</p>
+</details>
+<details class="faq">
+<summary>¿Qué recibo al final?</summary>
+<p>Recibes un archivo digital en alta resolución listo para imprimir o compartir.</p>
+</details>
+<details class="faq">
+<summary>¿Qué es el archivo PDF?</summary>
+<p>Es un archivo de alta resolución ideal para imprimir tu mapa estelar con gran calidad.</p>
+</details>
+</div>
+</div>
 </section>
 <footer class="footer" id="foot">
 <div class="footer__container">
